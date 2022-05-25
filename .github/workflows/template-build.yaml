@@ -36,6 +36,4 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: ${{ inputs.service}}
           IMAGE_TAG: ${{ inputs.image_tag}}
-        run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=$GH_TOKEN .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+        run: scripts/build.sh
