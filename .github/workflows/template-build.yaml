@@ -37,9 +37,5 @@ jobs:
           ECR_REPOSITORY: ${{ inputs.service}}
           IMAGE_TAG: ${{ inputs.image_tag}}
         run: |
-          if [[ -z $GH_TOKEN ]]; then
-            echo "Missing required var GH_TOKEN"
-            exit 1
-          fi
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=$GH_TOKEN .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
