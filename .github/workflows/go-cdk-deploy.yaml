@@ -1,0 +1,56 @@
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+      account-id:
+        required: true
+        type: string
+
+jobs:
+  aws_cdk:
+    runs-on: ubuntu-latest
+    container: 
+      image: ghcr.io/useheartbeat/heartbeat-go-cdk-dockerfile:main
+      credentials:
+        username: hbh-github
+        password: ${{ secrets.GH_TOKEN }}
+
+    permissions:
+      id-token: write
+      contents: read
+
+    name: Deploy
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod            
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+                        ${{ runner.os }}-go-
+
+      - name: Get modules
+        working-directory: ./cdk-infra
+        run: |
+          go mod download       
+
+      - name: Configure aws credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.account-id }}:role/GitHubRole
+          role-session-name: actions-${{ inputs.env }}
+          aws-region: 'us-east-1'
+
+      - name: Synth stack
+        working-directory: ./cdk-infra
+        run: cdk synth -c envName=${{ inputs.env }}
+
+      - name: Deploy stack
+        working-directory: ./cdk-infra
+        run: cdk deploy --all -c envName=${{ inputs.env }}
