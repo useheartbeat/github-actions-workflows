@@ -30,7 +30,7 @@ jobs:
 
       - name: Get Hash
         id: hash
-        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-8`" >> $GITHUB_ENV
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
 
       - name: Build, tag, and push image to Amazon ECR
         env:
@@ -38,5 +38,6 @@ jobs:
           ECR_REPOSITORY: ${{ inputs.service}}
           IMAGE_TAG: ${SHORT_SHA}
         run: |
+          echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
