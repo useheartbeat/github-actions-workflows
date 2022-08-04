@@ -46,4 +46,4 @@ jobs:
           ENV: ${{ inputs.env }}
         run: |
           AWS_DEFAULT_REGION=us-east-1 helm repo add hbh s3://hbh-helm-charts
-          env=$ENV region=us-east-1 image_tag=$IMAGE_TAGE helmfile -f stable/$SERVICE.yaml sync
+          env=$ENV region=us-east-1 image_tag=$IMAGE_TAG helmfile -f stable/$SERVICE.yaml sync
