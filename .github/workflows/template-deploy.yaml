@@ -43,7 +43,7 @@ jobs:
         uses: mamezou-tech/setup-helmfile@v1.0.0
 
       - name: Helmfile sync
-        working-directory: ../helmfile
+        working-directory: ./helmfile
         env:
           SERVICE: ${{ inputs.service }}
           IMAGE_TAG: ${{ inputs.image-tag }}
