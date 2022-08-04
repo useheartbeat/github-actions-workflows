@@ -23,9 +23,6 @@ jobs:
       contents: read
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      
       - name: Check out helmfile repo
         uses: actions/checkout@master
         with:
@@ -43,7 +40,6 @@ jobs:
         uses: mamezou-tech/setup-helmfile@v1.0.0
 
       - name: Helmfile sync
-        working-directory: ./helmfile
         env:
           SERVICE: ${{ inputs.service }}
           IMAGE_TAG: ${{ inputs.image-tag }}
