@@ -1,0 +1,53 @@
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      env:
+        required: true
+        type: string
+      account-id:
+        required: true
+        type: string
+      image-tag:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-18.04
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Check out helmfile repo
+        uses: actions/checkout@master
+        with:
+          repository: useheartbeat/helmfile
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: arn:aws:iam::${{ inputs.account-id }}:role/GitHubRole
+          aws-region: us-east-1
+          role-session-name: actions-${{ inputs.env }}
+
+      - name: Setup helmfile
+        uses: mamezou-tech/setup-helmfile@v1.0.0
+
+      - name: Helmfile sync
+        working-directory: ../helmfile
+        env:
+          SERVICE: ${{ inputs.service }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
+          ENV: ${{ inputs.env }}
+        run: |
+          AWS_DEFAULT_REGION=us-east-1 helm repo add hbh s3://hbh-helm-charts
+          env=$ENV region=us-east-1 image_tag=$IMAGE_TAGE helmfile -f stable/$SERVICE.yaml sync
