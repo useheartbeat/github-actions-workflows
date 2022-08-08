@@ -41,7 +41,7 @@ jobs:
 
       - name: Helmfile sync
         env:
-          SERVICE: ${{ inputs.service }}
+          SERVICE: hb-${{ inputs.service }}
           IMAGE_TAG: ${{ inputs.image-tag }}
           ENV: ${{ inputs.env }}
         run: |
