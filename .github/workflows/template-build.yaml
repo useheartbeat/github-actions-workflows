@@ -43,7 +43,7 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Trigger deploy to Dev
-        if: github.ref != 'ref/head/main'
+        if: github.ref != 'refs/heads/main'
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
@@ -52,7 +52,7 @@ jobs:
           client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}"}'
 
       - name: Trigger deploy to Prod
-        if: github.ref == 'ref/head/main'
+        if: github.ref == 'refs/heads/main'
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
