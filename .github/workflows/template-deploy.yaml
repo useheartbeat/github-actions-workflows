@@ -7,7 +7,7 @@ on:
       env:
         required: true
         type: string
-      account-id:
+      iam-role:
         required: true
         type: string
       image-tag:
@@ -32,7 +32,7 @@ jobs:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
-          role-to-assume: arn:aws:iam::${{ inputs.account-id }}:role/GitHubRole
+          role-to-assume: ${{ inputs.iam-role }}
           aws-region: us-east-1
           role-session-name: actions-${{ inputs.env }}
 
