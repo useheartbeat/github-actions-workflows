@@ -43,10 +43,19 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Trigger deploy to Dev
-        if: success()
+        if: github.ref != 'ref/head/main'
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-dev-deploy
+          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}"}'
+
+      - name: Trigger deploy to Prod
+        if: github.ref == 'ref/head/main'
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: useheartbeat/heartbeat-${{ inputs.service }}
+          event-type: trigger-prod-deploy
           client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}"}'
