@@ -47,10 +47,19 @@ jobs:
           role-session-name: actions-${{ inputs.env }}
           aws-region: 'us-east-1'
 
-      - name: Synth stack
+      - name: Clear context
         working-directory: ./cdk-infra
-        run: cdk synth -c envName=${{ inputs.env }}
+        run: cdk context --clear
 
-      - name: Deploy stack
+      - name: Deploy User stack
         working-directory: ./cdk-infra
-        run: cdk deploy --all -c envName=${{ inputs.env }}
+        run: cdk deploy -c envName=${{ inputs.env }} HBHPartnerUserPoolStack
+        
+      - name: Clear context
+        working-directory: ./cdk-infra
+        run: cdk context --clear
+
+      - name: Deploy GW stack
+        working-directory: ./cdk-infra
+        run: cdk deploy -c envName=${{ inputs.env }} HBHPartnerApiGwStack
+        
