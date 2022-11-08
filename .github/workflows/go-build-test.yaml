@@ -15,9 +15,6 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: '1.16.x'
-      - name: Install dependencies
-        working-directory: ${{ inputs.go_project_dir_root }}
-        run: go get .
       - name: Build
         working-directory: ${{ inputs.go_project_dir_root }}
         run: go build -v ./...
