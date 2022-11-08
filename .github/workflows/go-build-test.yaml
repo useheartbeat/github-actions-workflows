@@ -1,13 +1,14 @@
 name: Go
-on: [push]
-  inputs:
-    go_project_dir_root:
-      required: true
-      type: string
+on: 
+  workflow_call:
+    inputs:
+      go_project_dir_root:
+        required: true
+        type: string
 jobs:
   build:
     runs-on: ubuntu-latest
-
+]
     steps:
       - uses: actions/checkout@v3
       - name: Setup Go
