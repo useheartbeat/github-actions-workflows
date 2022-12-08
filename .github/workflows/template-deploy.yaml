@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Check out helmfile repo
-        uses: actions/checkout@master
+        uses: actions/checkout@v3
         with:
           repository: useheartbeat/helmfile
           token: ${{ secrets.GH_TOKEN }}
