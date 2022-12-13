@@ -15,13 +15,14 @@ on:
         type: string
 
 jobs:
-  deploy:
+  test:
     runs-on: ubuntu-20.04
 
     permissions:
       id-token: write
       contents: read
 
+    steps:
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
