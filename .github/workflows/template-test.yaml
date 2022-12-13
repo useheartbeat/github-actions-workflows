@@ -48,7 +48,9 @@ jobs:
           SERVICE: hb-${{ inputs.service }}
           IMAGE_TAG: ${{ inputs.image-tag }}
           ENV: ${{ inputs.env }}
-        run: ${GITHUB_WORKSPACE}/.github/scripts/integ-test.sh $ENV us-east-1 test $SERVICE $IMAGE_TAG
+        run: |
+          chmod +x "${GITHUB_WORKSPACE}/.github/scripts/integ-test.sh"
+          ${GITHUB_WORKSPACE}/.github/scripts/integ-test.sh $ENV us-east-1 test $SERVICE $IMAGE_TAG
 
       - name: Display test reports
         uses: mikepenz/action-junit-report@v3
