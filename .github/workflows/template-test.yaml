@@ -23,6 +23,18 @@ jobs:
       contents: read
 
     steps:
+      - name: Checkout service repo
+        uses: actions/checkout@v3
+        with:
+          path: ${{ inputs.service }}
+
+      - name: Check out helmfile repo
+        uses: actions/checkout@v3
+        with:
+          repository: useheartbeat/helmfile
+          token: ${{ secrets.GH_TOKEN }}
+          path: helmfile
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
@@ -49,11 +61,13 @@ jobs:
           IMAGE_TAG: ${{ inputs.image-tag }}
           ENV: ${{ inputs.env }}
         run: |
-          chmod +x "${GITHUB_WORKSPACE}/.github/scripts/integ-test.sh"
-          ${GITHUB_WORKSPACE}/.github/scripts/integ-test.sh $ENV us-east-1 test $SERVICE $IMAGE_TAG
+          cd ${GITHUB_WORKSPACE}/hb-${{ inputs.service }}
+          chmod +x .github/scripts/integ-test.sh
+          ./.github/scripts/integ-test.sh $ENV us-east-1 test $SERVICE $IMAGE_TAG
+        shell: bash
 
       - name: Display test reports
         uses: mikepenz/action-junit-report@v3
         if: always() # always run even if the previous step fails
         with:
-          report_paths: '**/build/test-results/**/*.xml'
+          report_paths: 'helmfile/**/build/test-results/**/*.xml'
