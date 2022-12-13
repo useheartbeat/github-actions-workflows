@@ -61,8 +61,10 @@ jobs:
           IMAGE_TAG: ${{ inputs.image-tag }}
           ENV: ${{ inputs.env }}
         run: |
-          chmod +x ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/integ-test.sh
-          ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/integ-test.sh $ENV us-east-1 test $SERVICE $IMAGE_TAG
+          ls ${GITHUB_WORKSPACE}/
+          ls ${GITHUB_WORKSPACE}/${{ inputs.service }}/
+          # chmod +x ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/integ-test.sh
+          # ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/integ-test.sh $ENV us-east-1 test $SERVICE $IMAGE_TAG
         shell: bash
 
       - name: Display test reports
