@@ -56,6 +56,6 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-tests
-          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
+          client-payload: '{"sha": "${{ inputs.image-tag }}",
                             "iam_role": "${{ inputs.iam-role }}",
                             "env": "${{ inputs.env }}"}'
