@@ -48,3 +48,14 @@ jobs:
           AWS_DEFAULT_REGION=us-east-1 helm repo add hbh s3://hbh-helm-charts
           aws eks --region us-east-1 update-kubeconfig --name $ENV-us-east-1-eks
           env=$ENV region=us-east-1 ns=$ENV image_tag=$IMAGE_TAG helmfile -f stable/$SERVICE.yaml sync
+
+      - name: Trigger tests
+        if: github.ref != 'refs/heads/main'
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: useheartbeat/heartbeat-${{ inputs.service }}
+          event-type: trigger-tests
+          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
+                            "iam_role": "${{ inputs.iam-role }}",
+                            "env": "${{ inputs.env }}"'

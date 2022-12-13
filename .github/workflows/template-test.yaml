@@ -1,0 +1,56 @@
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      env:
+        required: true
+        type: string
+      iam-role:
+        required: true
+        type: string
+      image-tag:
+        required: true
+        type: string
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+
+    permissions:
+      id-token: write
+      contents: read
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ inputs.iam-role }}
+          aws-region: us-east-1
+          role-session-name: actions-${{ inputs.env }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.20.0'
+        id: install
+
+      - name: Setup helmfile
+        uses: mamezou-tech/setup-helmfile@v1.0.0
+
+      - name: Get branch name
+        id: branch
+        run: echo "branch=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
+
+      - name: Run test script
+        env:
+          SERVICE: hb-${{ inputs.service }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
+          ENV: ${{ inputs.env }}
+        run: ./.github/scripts/integ-test.sh $ENV us-east-1 test $SERVICE $IMAGE_TAG
+
+      - name: Display test reports
+        uses: mikepenz/action-junit-report@v3
+        if: always() # always run even if the previous step fails
+        with:
+          report_paths: '**/build/test-results/**/*.xml'
