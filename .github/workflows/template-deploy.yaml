@@ -58,4 +58,4 @@ jobs:
           event-type: trigger-tests
           client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
                             "iam_role": "${{ inputs.iam-role }}",
-                            "env": "${{ inputs.env }}"'
+                            "env": "${{ inputs.env }}"}'
