@@ -40,7 +40,7 @@ jobs:
           role-session-name: actions-${{ inputs.env }}
 
       - name: Setup helmfile
-        uses: mamezou-tech/setup-helmfile@v1.0.0
+        uses: mamezou-tech/setup-helmfile@v1.2.0
 
 #Deploy to <env> namespace if tests is false, otherwise skip and just trigger tests
       - name: Helmfile sync

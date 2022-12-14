@@ -49,7 +49,7 @@ jobs:
         id: install
 
       - name: Setup helmfile
-        uses: mamezou-tech/setup-helmfile@v1.0.0
+        uses: mamezou-tech/setup-helmfile@v1.2.0
 
       - name: Get branch name
         id: branch
@@ -70,3 +70,4 @@ jobs:
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/build/test-results/**/*.xml'
+          token: ${{ secrets.GH_TOKEN }}
