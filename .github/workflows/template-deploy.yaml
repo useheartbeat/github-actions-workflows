@@ -44,7 +44,7 @@ jobs:
 
 #Deploy to <env> namespace if tests is false, otherwise skip and just trigger tests
       - name: Helmfile sync
-        if: ${{ inputs.tests == "false" }}
+        if: ${{ inputs.tests == 'false' }}
         env:
           SERVICE: hb-${{ inputs.service }}
           IMAGE_TAG: ${{ inputs.image-tag }}
