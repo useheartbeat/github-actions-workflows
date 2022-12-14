@@ -14,6 +14,33 @@ jobs:
       contents: read
 
     steps:
+      - name: Post status to Slack
+        id: slack
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          # The following message update step does not accept a channel name.
+          # Setting a channel ID here for consistency is highly recommended.
+          channel-id: ${{ secrets.SLACK_STATUS_CHANNEL }}
+          payload: |
+            {
+              "text": "Build started (In Progress)",
+              "attachments": [
+                {
+                  "pretext": "Build started",
+                  "color": "dbab09",
+                  "fields": [
+                    {
+                      "title": "Status",
+                      "short": true,
+                      "value": "In Progress"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -38,6 +65,7 @@ jobs:
         run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
       - name: Build, tag, and push image to Amazon ECR
+        id: build
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: hb-${{ inputs.service }}
@@ -46,6 +74,32 @@ jobs:
           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Post build status to Slack
+        if: always()
+        uses: slackapi/slack-github-action@v1.23.0
+        with:
+          channel-id: ${{ secrets.SLACK_STATUS_CHANNEL }}
+          update-ts: ${{ steps.slack.outputs.ts }}
+          payload: |
+            {
+              "text": "Build finished (Completed)",
+              "attachments": [
+                {
+                  "pretext": "Build finished",
+                  "color": "28a745",
+                  "fields": [
+                    {
+                      "title": "Status",
+                      "short": true,
+                      "value": "${{ steps.build.outcome }}""
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
       - name: Trigger deploy to Dev
         if: |
