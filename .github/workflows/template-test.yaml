@@ -23,39 +23,24 @@ jobs:
       contents: read
 
     steps:
-      - name: Post status to Slack
-        id: slack
-        uses: slackapi/slack-github-action@v1.23.0
+      - name: Slack status
+        if: always()
+        uses: act10ns/slack@v1
         with:
-          # The following message update step does not accept a channel name.
-          # Setting a channel ID here for consistency is highly recommended.
-          channel-id: ${{ secrets.SLACK_STATUS_CHANNEL }}
-          payload: |
-            {
-              "text": "Tests started (In Progress)",
-              "attachments": [
-                {
-                  "pretext": "Tests started for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "color": "dbab09",
-                  "fields": [
-                    {
-                      "title": "Status",
-                      "short": true,
-                      "value": "In Progress"
-                    }
-                  ]
-                }
-              ]
-            }
+          status: starting
+          channel: '#github-actions'
+          message: Starting Tests...
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Checkout service repo
+        id: checkout-app
         uses: actions/checkout@v3
         with:
           path: ${{ inputs.service }}
 
       - name: Check out helmfile repo
+        id: checkout-helm
         uses: actions/checkout@v3
         with:
           repository: useheartbeat/helmfile
@@ -63,6 +48,7 @@ jobs:
           path: helmfile
 
       - name: Configure AWS credentials
+        id: creds
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: ${{ inputs.iam-role }}
@@ -73,9 +59,10 @@ jobs:
         uses: azure/setup-kubectl@v3
         with:
           version: 'v1.20.0'
-        id: install
+        id: install-kubectl
 
       - name: Setup helmfile
+        id: setup-helm
         uses: mamezou-tech/setup-helmfile@v1.2.0
 
       - name: Get branch name
@@ -93,31 +80,15 @@ jobs:
           ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/integ-test.sh $ENV us-east-1 test $SERVICE $IMAGE_TAG
         shell: bash
 
-      - name: Post build status to Slack
+      - name: Post final status
         if: always()
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: act10ns/slack@v1
         with:
-          channel-id: ${{ secrets.SLACK_STATUS_CHANNEL }}
-          update-ts: ${{ steps.slack.outputs.ts }}
-          payload: |
-            {
-              "text": "Tests finished (Completed)",
-              "attachments": [
-                {
-                  "pretext": "Tests finished for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "color": "28a745",
-                  "fields": [
-                    {
-                      "title": "Status",
-                      "short": true,
-                      "value": "${{ steps.test.outcome }}"
-                    }
-                  ]
-                }
-              ]
-            }
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: '#github-actions'
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Display test reports
         uses: mikepenz/action-junit-report@v3

@@ -14,37 +14,22 @@ jobs:
       contents: read
 
     steps:
-      - name: Post status to Slack
-        id: slack
-        uses: slackapi/slack-github-action@v1.23.0
+      - name: Slack status
+        if: always()
+        uses: act10ns/slack@v1
         with:
-          # The following message update step does not accept a channel name.
-          # Setting a channel ID here for consistency is highly recommended.
-          channel-id: ${{ secrets.SLACK_STATUS_CHANNEL }}
-          payload: |
-            {
-              "text": "Build started (In Progress)",
-              "attachments": [
-                {
-                  "pretext": "Build started for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "color": "dbab09",
-                  "fields": [
-                    {
-                      "title": "Status",
-                      "short": true,
-                      "value": "In Progress"
-                    }
-                  ]
-                }
-              ]
-            }
+          status: starting
+          channel: '#github-actions'
+          message: Starting Docker Build and Push...
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Checkout
+        id: checkout
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
+        id: creds
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: arn:aws:iam::631720813209:role/GitHubRole
@@ -75,31 +60,15 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Post build status to Slack
+      - name: Post final status
         if: always()
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: act10ns/slack@v1
         with:
-          channel-id: ${{ secrets.SLACK_STATUS_CHANNEL }}
-          update-ts: ${{ steps.slack.outputs.ts }}
-          payload: |
-            {
-              "text": "Build finished (Completed)",
-              "attachments": [
-                {
-                  "pretext": "Build finished for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "color": "28a745",
-                  "fields": [
-                    {
-                      "title": "Status",
-                      "short": true,
-                      "value": "${{ steps.build.outcome }}"
-                    }
-                  ]
-                }
-              ]
-            }
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: '#github-actions'
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Trigger deploy to Dev
         if: |

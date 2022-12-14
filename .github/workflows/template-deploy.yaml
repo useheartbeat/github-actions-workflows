@@ -23,40 +23,25 @@ jobs:
       contents: read
 
     steps:
-      - name: Post status to Slack
-        id: slack
-        uses: slackapi/slack-github-action@v1.23.0
+      - name: Slack status
+        if: always()
+        uses: act10ns/slack@v1
         with:
-          # The following message update step does not accept a channel name.
-          # Setting a channel ID here for consistency is highly recommended.
-          channel-id: ${{ secrets.SLACK_STATUS_CHANNEL }}
-          payload: |
-            {
-              "text": "Deployment started (In Progress)",
-              "attachments": [
-                {
-                  "pretext": "Deployment started for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "color": "dbab09",
-                  "fields": [
-                    {
-                      "title": "Status",
-                      "short": true,
-                      "value": "In Progress"
-                    }
-                  ]
-                }
-              ]
-            }
+          status: starting
+          channel: '#github-actions'
+          message: Starting Deploy...
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Check out helmfile repo
+        id: checkout-helm
         uses: actions/checkout@v3
         with:
           repository: useheartbeat/helmfile
           token: ${{ secrets.GH_TOKEN }}
 
       - name: Configure AWS credentials
+        id: creds
         uses: aws-actions/configure-aws-credentials@v1-node16
         with:
           role-to-assume: ${{ inputs.iam-role }}
@@ -72,7 +57,7 @@ jobs:
 
 #Deploy to <env> namespace if branch name starts with test/**, otherwise skip and just trigger tests
       - name: Helmfile sync
-        id: sync
+        id: Helm-sync
         if: startsWith(steps.branch.outputs.branch, 'test')
         env:
           SERVICE: hb-${{ inputs.service }}
@@ -83,31 +68,15 @@ jobs:
           aws eks --region us-east-1 update-kubeconfig --name $ENV-us-east-1-eks
           env=$ENV region=us-east-1 ns=$ENV image_tag=$IMAGE_TAG helmfile -f stable/$SERVICE.yaml sync
 
-      - name: Post build status to Slack
+      - name: Post final status
         if: always()
-        uses: slackapi/slack-github-action@v1.23.0
+        uses: act10ns/slack@v1
         with:
-          channel-id: ${{ secrets.SLACK_STATUS_CHANNEL }}
-          update-ts: ${{ steps.slack.outputs.ts }}
-          payload: |
-            {
-              "text": "Deployment finished (Completed)",
-              "attachments": [
-                {
-                  "pretext": "Deployment finished for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
-                  "color": "28a745",
-                  "fields": [
-                    {
-                      "title": "Status",
-                      "short": true,
-                      "value": "${{ steps.sync.outcome }}"
-                    }
-                  ]
-                }
-              ]
-            }
+          status: ${{ job.status }}
+          steps: ${{ toJson(steps) }}
+          channel: '#github-actions'
         env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Trigger tests
         if: github.ref != 'refs/heads/main'
