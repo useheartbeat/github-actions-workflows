@@ -50,7 +50,7 @@ jobs:
 # if branch name matches "test/**" pattern, then skip deploying dev in "dev" namespace
 # and just deploy to test namespace
       - name: Trigger deploy to test namespace in Dev
-        if: startsWith(${{ steps.branch.outputs.branch }}, "test")
+        if: ${{ startsWith(${{ steps.branch.outputs.branch }}, "test") }}
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
@@ -63,9 +63,9 @@ jobs:
 # and trigger tests in test namespace afterwards
       - name: Trigger deploy to Dev
         if: |
-          startsWith(${{ steps.branch.outputs.branch }}, "hotfix") ||
-          startsWith(${{ steps.branch.outputs.branch }}, "feature") ||
-          startsWith(${{ steps.branch.outputs.branch }}, "fix")
+          ${{ startsWith(${{ steps.branch.outputs.branch }}, "hotfix") ||
+              startsWith(${{ steps.branch.outputs.branch }}, "feature") ||
+              startsWith(${{ steps.branch.outputs.branch }}, "fix") }}
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
