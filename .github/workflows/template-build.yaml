@@ -35,7 +35,7 @@ jobs:
 
       - name: Get branch name
         id: branch
-        run: echo "branch=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
+        run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
       - name: Build, tag, and push image to Amazon ECR
         env:
@@ -56,8 +56,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-dev-deploy
-          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
-                            "test": "true"}'
+          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}"}'
 
 # if branch name matches "hotfix/**", "feature/**", or "fix/**" pattern, then deploy to dev in "dev" namespace
 # and trigger tests in test namespace afterwards
@@ -71,8 +70,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-dev-deploy
-          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
-                            "test": "false"}'
+          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}"}'
 
 # if on the main branch, deploy to prod with no tests
       - name: Trigger deploy to Prod
@@ -82,5 +80,4 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-prod-deploy
-          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
-                            "test": "false"}'
+          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}"}'

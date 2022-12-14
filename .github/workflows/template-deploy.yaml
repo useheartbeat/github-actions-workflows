@@ -13,9 +13,6 @@ on:
       image-tag:
         required: true
         type: string
-      tests:
-        required: true
-        type: string
 
 jobs:
   deploy:
@@ -39,12 +36,16 @@ jobs:
           aws-region: us-east-1
           role-session-name: actions-${{ inputs.env }}
 
+      - name: Get branch name
+        id: branch
+        run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+
       - name: Setup helmfile
         uses: mamezou-tech/setup-helmfile@v1.2.0
 
-#Deploy to <env> namespace if tests is false, otherwise skip and just trigger tests
+#Deploy to <env> namespace if branch name starts with test/**, otherwise skip and just trigger tests
       - name: Helmfile sync
-        if: ${{ inputs.tests == 'false' }}
+        if: startsWith(steps.branch.outputs.branch, 'test')
         env:
           SERVICE: hb-${{ inputs.service }}
           IMAGE_TAG: ${{ inputs.image-tag }}
