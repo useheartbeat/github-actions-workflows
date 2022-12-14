@@ -26,7 +26,7 @@ jobs:
               "text": "Build started (In Progress)",
               "attachments": [
                 {
-                  "pretext": "Build started",
+                  "pretext": "Build started for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "color": "dbab09",
                   "fields": [
                     {
@@ -86,13 +86,13 @@ jobs:
               "text": "Build finished (Completed)",
               "attachments": [
                 {
-                  "pretext": "Build finished",
+                  "pretext": "Build finished for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "color": "28a745",
                   "fields": [
                     {
                       "title": "Status",
                       "short": true,
-                      "value": "${{ steps.build.outcome }}""
+                      "value": "${{ steps.build.outcome }}"
                     }
                   ]
                 }

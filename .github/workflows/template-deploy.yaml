@@ -35,7 +35,7 @@ jobs:
               "text": "Deployment started (In Progress)",
               "attachments": [
                 {
-                  "pretext": "Deployment started",
+                  "pretext": "Deployment started for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "color": "dbab09",
                   "fields": [
                     {
@@ -94,13 +94,13 @@ jobs:
               "text": "Deployment finished (Completed)",
               "attachments": [
                 {
-                  "pretext": "Deployment finished",
+                  "pretext": "Deployment finished for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "color": "28a745",
                   "fields": [
                     {
                       "title": "Status",
                       "short": true,
-                      "value": "${{ steps.sync.outcome }}""
+                      "value": "${{ steps.sync.outcome }}"
                     }
                   ]
                 }

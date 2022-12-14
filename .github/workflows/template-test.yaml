@@ -35,7 +35,7 @@ jobs:
               "text": "Tests started (In Progress)",
               "attachments": [
                 {
-                  "pretext": "Tests started",
+                  "pretext": "Tests started for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "color": "dbab09",
                   "fields": [
                     {
@@ -104,13 +104,13 @@ jobs:
               "text": "Tests finished (Completed)",
               "attachments": [
                 {
-                  "pretext": "Tests finished",
+                  "pretext": "Tests finished for ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
                   "color": "28a745",
                   "fields": [
                     {
                       "title": "Status",
                       "short": true,
-                      "value": "${{ steps.test.outcome }}""
+                      "value": "${{ steps.test.outcome }}"
                     }
                   ]
                 }
