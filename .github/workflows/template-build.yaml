@@ -33,6 +33,10 @@ jobs:
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
         # run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)" DEPRECATED
 
+      - name: Get branch name
+        id: branch
+        run: echo "branch=${GITHUB_REF##*/}" >> $GITHUB_OUTPUT
+
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -43,15 +47,34 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Trigger deploy to Dev
-        if: github.ref != 'refs/heads/main'
+# if branch name matches "test/**" pattern, then skip deploying dev in "dev" namespace
+# and just deploy to test namespace
+      - name: Trigger deploy to test namespace in Dev
+        if: startsWith(${{ steps.branch.outputs.branch }}, "test")
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-dev-deploy
-          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}"}'
+          client-payload: '{"sha": "${{ inputs.image-tag }}",
+                            "test": "true"}'
 
+# if branch name matches "hotfix/**", "feature/**", or "fix/**" pattern, then deploy to dev in "dev" namespace
+# and trigger tests in test namespace afterwards
+      - name: Trigger deploy to Dev
+        if: |
+          startsWith(${{ steps.branch.outputs.branch }}, "hotfix") ||
+          startsWith(${{ steps.branch.outputs.branch }}, "feature") ||
+          startsWith(${{ steps.branch.outputs.branch }}, "fix")
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: useheartbeat/heartbeat-${{ inputs.service }}
+          event-type: trigger-dev-deploy
+          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
+                            "test": "false"}'
+
+# if on the main branch, deploy to prod with no tests
       - name: Trigger deploy to Prod
         if: github.ref == 'refs/heads/main'
         uses: peter-evans/repository-dispatch@v2
@@ -59,4 +82,5 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-prod-deploy
-          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}"}'
+          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
+                            "test": "false"}'
