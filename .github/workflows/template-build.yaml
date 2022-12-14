@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Slack status
         if: always()
-        uses: act10ns/slack@v1
+        uses: act10ns/slack@v2.0.0
         with:
           status: starting
           channel: '#github-actions'
@@ -62,7 +62,7 @@ jobs:
 
       - name: Post final status
         if: always()
-        uses: act10ns/slack@v1
+        uses: act10ns/slack@v2.0.0
         with:
           status: ${{ job.status }}
           steps: ${{ toJson(steps) }}
