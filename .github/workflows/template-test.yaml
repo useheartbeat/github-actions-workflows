@@ -29,7 +29,7 @@ jobs:
         with:
           status: starting
           channel: '#github-actions'
-          message: Starting Tests...
+          message: Starting Tests for ${{ inputs.service }}:${{ inputs.image-tag }} on ${{ inputs.env }}...
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -80,19 +80,20 @@ jobs:
           ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/integ-test.sh $ENV us-east-1 test $SERVICE $IMAGE_TAG
         shell: bash
 
-      - name: Post final status
-        if: always()
-        uses: act10ns/slack@v2.0.0
-        with:
-          status: ${{ job.status }}
-          steps: ${{ toJson(steps) }}
-          channel: '#github-actions'
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
       - name: Display test reports
+        id: results
         uses: mikepenz/action-junit-report@v3
         if: always() # always run even if the previous step fails
         with:
           report_paths: '**/build/test-results/**/*.xml'
           token: ${{ secrets.GITHUB_TOKEN }} #default github token, not ours
+
+      - name: Post final status
+        if: ${{ steps.test.conclusion == 'failure' }}
+        uses: act10ns/slack@v2.0.0
+        with:
+          status: ${{ job.status }}
+          channel: '#github-actions'
+          message: ${{steps.results.outputs.passed}} out of ${{steps.results.outputs.total}} tests passed. ${{steps.results.outputs.failed}} failed.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

@@ -29,7 +29,7 @@ jobs:
         with:
           status: starting
           channel: '#github-actions'
-          message: Starting Deploy...
+          message: Starting Deploy for ${{ inputs.service }}:${{ inputs.image-tag }} to ${{ inputs.env }}...
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -73,7 +73,6 @@ jobs:
         uses: act10ns/slack@v2.0.0
         with:
           status: ${{ job.status }}
-          steps: ${{ toJson(steps) }}
           channel: '#github-actions'
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
