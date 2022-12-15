@@ -71,6 +71,7 @@ jobs:
 
       - name: Run test script
         id: test
+        continue-on-error: true
         env:
           SERVICE: hb-${{ inputs.service }}
           IMAGE_TAG: ${{ inputs.image-tag }}
@@ -88,12 +89,22 @@ jobs:
           report_paths: '**/build/test-results/**/*.xml'
           token: ${{ secrets.GITHUB_TOKEN }} #default github token, not ours
 
-      - name: Post final status
-        if: always()
+      - name: Post result status
+        if: ${{ steps.test.conclusion == 'success' && steps.results.outcome == 'success' }}
         uses: act10ns/slack@v2.0.0
         with:
           status: ${{ job.status }}
           channel: '#github-actions'
           message: ${{steps.results.outputs.passed}} out of ${{steps.results.outputs.total}} tests passed. ${{steps.results.outputs.failed}} failed.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+       - name: Post final status
+        if: always()
+        uses: act10ns/slack@v2.0.0
+        with:
+          status: ${{ job.status }}
+          channel: '#github-actions'
+          message: Failed to get test results for ${{ inputs.service }}:${{ inputs.image-tag }} on ${{ inputs.env }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
