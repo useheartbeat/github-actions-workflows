@@ -93,4 +93,4 @@ jobs:
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-prod-deploy
           client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
-                            "branch: "${{ steps.branch.outputs.branch }}"}'
+                            "branch": "${{ steps.branch.outputs.branch }}"}'
