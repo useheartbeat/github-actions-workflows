@@ -23,15 +23,22 @@ jobs:
       contents: read
 
     steps:
+      - name: Get branch name
+        id: branch
+        run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+
       - name: Slack status
         if: always()
         uses: act10ns/slack@v2.0.0
         with:
           status: starting
           channel: '#github-actions'
-          message: Starting Deploy for ${{ inputs.service }}:${{ inputs.image-tag }} to ${{ inputs.env }}...
+          message: Starting Deploy for ${{ inputs.service }}:${{ inputs.image-tag }} branch ${{ steps.branch.outputs.branch }} to ${{ inputs.env }}...
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Setup helmfile
+        uses: mamezou-tech/setup-helmfile@v1.2.0
 
       - name: Check out helmfile repo
         id: checkout-helm
@@ -47,13 +54,6 @@ jobs:
           role-to-assume: ${{ inputs.iam-role }}
           aws-region: us-east-1
           role-session-name: actions-${{ inputs.env }}
-
-      - name: Get branch name
-        id: branch
-        run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
-
-      - name: Setup helmfile
-        uses: mamezou-tech/setup-helmfile@v1.2.0
 
 #Deploy to <env> namespace if branch name starts with test/**, otherwise skip and just trigger tests
       - name: Helmfile sync

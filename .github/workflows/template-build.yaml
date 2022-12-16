@@ -74,7 +74,8 @@ jobs:
           startsWith(steps.branch.outputs.branch, 'hotfix') ||
           startsWith(steps.branch.outputs.branch, 'feature') ||
           startsWith(steps.branch.outputs.branch, 'fix') ||
-          startsWith(steps.branch.outputs.branch, 'test')
+          startsWith(steps.branch.outputs.branch, 'test' ||
+          github.ref == 'refs/heads/main')
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
