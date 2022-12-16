@@ -13,6 +13,9 @@ on:
       image-tag:
         required: true
         type: string
+      branch:
+        required: true
+        type: string
 
 jobs:
   test:
@@ -23,17 +26,13 @@ jobs:
       contents: read
 
     steps:
-      - name: Get branch name
-        id: branch
-        run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
-
       - name: Slack status
         if: always()
         uses: act10ns/slack@v2.0.0
         with:
           status: starting
           channel: '#github-actions'
-          message: Starting Tests for ${{ inputs.service }}:${{ inputs.image-tag }} branch ${{ steps.branch.outputs.branch }} on ${{ inputs.env }}...
+          message: Starting Tests for ${{ inputs.service }}:${{ inputs.image-tag }} branch ${{ inputs.branch }} on ${{ inputs.env }}...
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 

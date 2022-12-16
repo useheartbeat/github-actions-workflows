@@ -13,6 +13,9 @@ on:
       image-tag:
         required: true
         type: string
+      branch:
+        required: true
+        type: string
 
 jobs:
   deploy:
@@ -23,17 +26,13 @@ jobs:
       contents: read
 
     steps:
-      - name: Get branch name
-        id: branch
-        run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
-
       - name: Slack status
         if: always()
         uses: act10ns/slack@v2.0.0
         with:
           status: starting
           channel: '#github-actions'
-          message: Starting Deploy for ${{ inputs.service }}:${{ inputs.image-tag }} branch ${{ steps.branch.outputs.branch }} to ${{ inputs.env }}...
+          message: Starting Deploy for ${{ inputs.service }}:${{ inputs.image-tag }} branch ${{ inputs.branch }} to ${{ inputs.env }}...
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
@@ -55,10 +54,10 @@ jobs:
           aws-region: us-east-1
           role-session-name: actions-${{ inputs.env }}
 
-#Deploy to <env> namespace if branch name starts with test/**, otherwise skip and just trigger tests
+#Deploy to <env> namespace if branch name does not start with test/**, otherwise skip and just trigger tests
       - name: Helmfile sync
         id: Helm-sync
-        if: startsWith(steps.branch.outputs.branch, 'test')
+        if: ${{ !startsWith(inputs.branch, 'test') }}
         env:
           SERVICE: hb-${{ inputs.service }}
           IMAGE_TAG: ${{ inputs.image-tag }}
@@ -86,4 +85,5 @@ jobs:
           event-type: trigger-tests
           client-payload: '{"sha": "${{ inputs.image-tag }}",
                             "iam_role": "${{ inputs.iam-role }}",
-                            "env": "${{ inputs.env }}"}'
+                            "env": "${{ inputs.env }}",
+                            "branch: "${{ inputs.branch }}"}'

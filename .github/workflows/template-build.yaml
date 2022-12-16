@@ -81,7 +81,8 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-dev-deploy
-          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}"}'
+          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
+                            "branch": "${{ steps.branch.outputs.branch }}"}'
 
 # if on the main branch, deploy to prod with no tests
       - name: Trigger deploy to Prod
