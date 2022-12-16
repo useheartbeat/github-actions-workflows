@@ -86,4 +86,4 @@ jobs:
           client-payload: '{"sha": "${{ inputs.image-tag }}",
                             "iam_role": "${{ inputs.iam-role }}",
                             "env": "${{ inputs.env }}",
-                            "branch: "${{ inputs.branch }}"}'
+                            "branch": "${{ inputs.branch }}"}'
