@@ -78,7 +78,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Trigger tests
-        if: ${{ inputs.branch != 'main' && inputs.branch != 'master' }}
+        if: ${{ inputs.env != 'prod' }}
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
