@@ -84,14 +84,3 @@ jobs:
           event-type: trigger-dev-deploy
           client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
                             "branch": "${{ steps.branch.outputs.branch }}"}'
-
-# if on the main branch, deploy to prod with no tests
-      - name: Trigger deploy to Prod
-        if: github.ref == 'refs/heads/main'
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          repository: useheartbeat/heartbeat-${{ inputs.service }}
-          event-type: trigger-prod-deploy
-          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
-                            "branch": "${{ steps.branch.outputs.branch }}"}'
