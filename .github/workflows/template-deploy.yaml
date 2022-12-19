@@ -73,7 +73,7 @@ jobs:
         with:
           status: ${{ job.status }}
           channel: '#github-actions'
-          message: Logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          message: Deploy ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
