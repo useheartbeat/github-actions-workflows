@@ -60,6 +60,20 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
+      - name: Check if branch is up to date
+        id: checkCurrent
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          DEFAULT_BRANCH=${{ github.event.repository.default_branch }}
+          git merge-base --is-ancestor origin/$DEFAULT_BRANCH HEAD
+          status_code=$?
+          if [ $status_code -eq 0 ]; then
+            echo "current='True'" >> $GITHUB_OUTPUT
+          else
+            echo "current='False'" >> $GITHUB_OUTPUT
+          fi
+
       - name: Post final status
         if: always()
         uses: act10ns/slack@v2.0.0
@@ -72,12 +86,13 @@ jobs:
 
       - name: Trigger deploy to Dev
         if: |
-          startsWith(steps.branch.outputs.branch, 'hotfix') ||
+          (startsWith(steps.branch.outputs.branch, 'hotfix') ||
           startsWith(steps.branch.outputs.branch, 'feature') ||
           startsWith(steps.branch.outputs.branch, 'fix') ||
           startsWith(steps.branch.outputs.branch, 'test') ||
           github.ref == 'refs/heads/main' ||
-          github.ref == 'refs/heads/master'
+          github.ref == 'refs/heads/master') &&
+          steps.checkCurrent.outputs.current == "True"
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
