@@ -92,7 +92,7 @@ jobs:
           startsWith(steps.branch.outputs.branch, 'test') ||
           github.ref == 'refs/heads/main' ||
           github.ref == 'refs/heads/master') &&
-          steps.checkCurrent.outputs.current == "True"
+          steps.checkCurrent.outputs.current == 'True'
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
