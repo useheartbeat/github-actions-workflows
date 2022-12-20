@@ -66,6 +66,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           DEFAULT_BRANCH=${{ github.event.repository.default_branch }}
+          git remote add $DEFAULT_BRANCH ${{ github.server_url }}/${{ github.repository }}.git
           git merge-base --is-ancestor origin/$DEFAULT_BRANCH HEAD
           status_code=$?
           if [ $status_code -eq 0 ]; then
