@@ -77,9 +77,6 @@ jobs:
              echo "current='True'" >> $GITHUB_OUTPUT
           fi
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Post final status
         if: always()
         uses: act10ns/slack@v2.0.0
@@ -98,7 +95,7 @@ jobs:
           startsWith(steps.branch.outputs.branch, 'test') ||
           github.ref == 'refs/heads/main' ||
           github.ref == 'refs/heads/master') &&
-          steps.checkCurrent.outputs.current == 'True'
+          (steps.checkCurrent.outputs.current == 'True')
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
