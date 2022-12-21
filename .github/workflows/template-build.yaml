@@ -27,6 +27,8 @@ jobs:
       - name: Checkout
         id: checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Configure AWS credentials
         id: creds
@@ -43,7 +45,6 @@ jobs:
       - name: Set short SHA
         id: sha
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-        # run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)" DEPRECATED
 
       - name: Get branch name
         id: branch
@@ -65,14 +66,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
+          set -x
           DEFAULT_BRANCH=${{ github.event.repository.default_branch }}
-          git fetch origin $DEFAULT_BRANCH:$DEFAULT_BRANCH
-          git merge-base --is-ancestor $DEFAULT_BRANCH HEAD
-          status_code=$?
-          if [ $status_code -eq 0 ]; then
-            echo "current='True'" >> $GITHUB_OUTPUT
-          else
+          git fetch
+          git checkout $DEFAULT_BRANCH
+          git checkout -
+          if ! git merge-base --is-ancestor $DEFAULT_BRANCH HEAD; then
             echo "current='False'" >> $GITHUB_OUTPUT
+          else
+             echo "current='True'" >> $GITHUB_OUTPUT
           fi
 
       - name: Post final status
@@ -99,5 +101,4 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-dev-deploy
-          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}",
-                            "branch": "${{ steps.branch.outputs.branch }}"}'
+          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}","branch": "${{ steps.branch.outputs.branch }}"}'
