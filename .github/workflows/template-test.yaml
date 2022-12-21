@@ -111,7 +111,7 @@ jobs:
 
       # if on the main branch, deploy to prod with
       - name: Trigger deploy to Prod
-        if: ${{ startsWith(inputs.branch, 'master') || startsWith(inputs.branch, 'main') || && steps.results.outputs.failed == 0 }}
+        if: ${{ (startsWith(inputs.branch, 'master') || startsWith(inputs.branch, 'main')) && steps.results.outputs.failed == 0 }}
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
