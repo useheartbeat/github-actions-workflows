@@ -102,13 +102,12 @@ jobs:
 
       - name: Trigger deploy to Dev
         if: |
-          (startsWith(steps.branch.outputs.branch, 'hotfix') ||
+          startsWith(steps.branch.outputs.branch, 'hotfix') ||
           startsWith(steps.branch.outputs.branch, 'feature') ||
           startsWith(steps.branch.outputs.branch, 'fix') ||
           startsWith(steps.branch.outputs.branch, 'test') ||
           github.ref == 'refs/heads/main' ||
-          github.ref == 'refs/heads/master') &&
-          steps.checkCurrent.outputs.current == 'True'
+          github.ref == 'refs/heads/master'
         uses: peter-evans/repository-dispatch@v2
         with:
           token: ${{ secrets.GH_TOKEN }}
