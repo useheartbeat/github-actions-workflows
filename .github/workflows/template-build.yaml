@@ -83,7 +83,7 @@ jobs:
         with:
           status: ${{ job.status }}
           channel: '#github-actions'
-          message: Build ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Ref: ${{ github.ref }}
+          message: Build ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}. Ref ${{ github.ref }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
