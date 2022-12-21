@@ -77,6 +77,9 @@ jobs:
              echo "current='True'" >> $GITHUB_OUTPUT
           fi
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+
       - name: Post final status
         if: always()
         uses: act10ns/slack@v2.0.0
