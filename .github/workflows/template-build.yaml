@@ -50,16 +50,16 @@ jobs:
         id: branch
         run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
-#       - name: Build, tag, and push image to Amazon ECR
-#         id: build
-#         env:
-#           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-#           ECR_REPOSITORY: hb-${{ inputs.service }}
-#           IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
-#         run: |
-#           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-#           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
-#           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+      - name: Build, tag, and push image to Amazon ECR
+        id: build
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: hb-${{ inputs.service }}
+          IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
+        run: |
+          echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Check if branch is up to date
         id: checkCurrent
