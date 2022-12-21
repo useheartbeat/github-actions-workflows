@@ -14,15 +14,15 @@ jobs:
       contents: read
 
     steps:
-      - name: Slack status
-        if: always()
-        uses: act10ns/slack@v2.0.0
-        with:
-          status: starting
-          channel: '#github-actions'
-          message: Starting Docker Build and Push...
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+#       - name: Slack status
+#         if: always()
+#         uses: act10ns/slack@v2.0.0
+#         with:
+#           status: starting
+#           channel: '#github-actions'
+#           message: Starting Docker Build and Push...
+#         env:
+#           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Checkout
         id: checkout
@@ -50,16 +50,16 @@ jobs:
         id: branch
         run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Build, tag, and push image to Amazon ECR
-        id: build
-        env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: hb-${{ inputs.service }}
-          IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
-        run: |
-          echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+#       - name: Build, tag, and push image to Amazon ECR
+#         id: build
+#         env:
+#           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+#           ECR_REPOSITORY: hb-${{ inputs.service }}
+#           IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
+#         run: |
+#           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+#           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
+#           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Check if branch is up to date
         id: checkCurrent
@@ -80,15 +80,15 @@ jobs:
       - name: Setup tmate session
         uses: mxschmitt/action-tmate@v3
 
-      - name: Post final status
-        if: always()
-        uses: act10ns/slack@v2.0.0
-        with:
-          status: ${{ job.status }}
-          channel: '#github-actions'
-          message: Build ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+#       - name: Post final status
+#         if: always()
+#         uses: act10ns/slack@v2.0.0
+#         with:
+#           status: ${{ job.status }}
+#           channel: '#github-actions'
+#           message: Build ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+#         env:
+#           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Trigger deploy to Dev
         if: |
