@@ -77,8 +77,8 @@ jobs:
              echo "current='True'" >> $GITHUB_OUTPUT
           fi
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
+#       - name: Setup tmate session
+#         uses: mxschmitt/action-tmate@v3
 
 #       - name: Post final status
 #         if: always()
@@ -89,6 +89,16 @@ jobs:
 #           message: Build ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 #         env:
 #           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Post final status
+        if: always()
+        uses: act10ns/slack@v2.0.0
+        with:
+          status: ${{ job.status }}
+          channel: '#github-actions'
+          message: Build ${{ job.status }}, returned ${{ steps.checkCurrent.outputs.current }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Trigger deploy to Dev
         if: |
