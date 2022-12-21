@@ -52,6 +52,9 @@ jobs:
       - name: Checkout
         id: checkout-mybranch
         uses: actions/checkout@v3
+        
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
 
       - name: Check if branch is up to date
         id: checkCurrent
