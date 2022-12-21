@@ -60,7 +60,7 @@ jobs:
         run: |
           set -x
           DEFAULT_BRANCH=${{ github.event.repository.default_branch }}
-          git merge-base --is-ancestor ${{ steps.masterSha.outputs.master_sha }} HEAD
+          git merge-base --is-ancestor ${{ steps.masterSha.outputs.master_sha }} HEAD || true
           status_code=$?
           if [ $status_code -eq 0 ]; then
             echo "current='True'" >> $GITHUB_OUTPUT
