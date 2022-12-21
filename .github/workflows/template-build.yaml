@@ -96,7 +96,7 @@ jobs:
         with:
           status: ${{ job.status }}
           channel: '#github-actions'
-          message: Build ${{ job.status }}, returned ${{ steps.checkCurrent.outputs.current }}
+          message: Build ${{ job.status }}, returned ${{ steps.checkCurrent.outputs.current }}, ref ${{ github.ref }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
