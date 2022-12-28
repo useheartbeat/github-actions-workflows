@@ -80,28 +80,37 @@ jobs:
           ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/integ-test.sh $ENV us-east-1 test $SERVICE $IMAGE_TAG
         shell: bash
 
-      - name: Display test reports
+      - name: Upload test results
         id: results
-        uses: dorny/test-reporter@v1.6.0
-        if: always() # always run even if the previous step fails
+        uses: actions/upload-artifact@v2
+        if: success() || failure()
         with:
-          name: ${{ inputs.service }}-tests
+          name: test-results
           path: '**/build/test-results/**/*.xml'
-          reporter: java-junit
 
       - name: Post result status
         id: slack-results
         if: ${{ steps.test.conclusion == 'success' && steps.results.outcome == 'success' }}
         uses: act10ns/slack@v2.0.0
         with:
-          status: ${{ job.status }}
+          status: ${{ steps.test.outcome }}
           channel: '#github-actions'
           message: ${{ steps.results.outputs.passed }} out of ${{ steps.results.outputs.total }} tests passed. ${{ steps.results.outputs.failed }} failed. Logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
+      - name: Trigger Test Results
+        if: ${{ steps.test.conclusion == 'success' }}
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+          repository: useheartbeat/heartbeat-${{ inputs.service }}
+          event-type: trigger-test-results
+          client-payload: '{"sha": "${{ inputs.image-tag }}",
+                            "branch": "${{ inputs.branch }}"}'
+
       - name: Post final status
-        if: ${{ steps.slack-results.outcome == 'skipped' || steps.slack-results.outcome == 'failed' }}
+        if: ${{ steps.slack-results.outcome == 'skipped' || steps.test.outcome == 'failed' }}
         uses: act10ns/slack@v2.0.0
         with:
           status: ${{ job.status }}
