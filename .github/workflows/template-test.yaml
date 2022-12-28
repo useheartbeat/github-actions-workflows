@@ -82,11 +82,11 @@ jobs:
 
       - name: Display test reports
         id: results
-        uses: mikepenz/action-junit-report@v3
+        uses: dorny/test-reporter@v1.6.0
         if: always() # always run even if the previous step fails
         with:
-          report_paths: '**/build/test-results/**/*.xml'
-          token: ${{ secrets.GITHUB_TOKEN }} #default github token, not ours
+          path: '**/build/test-results/**/*.xml'
+          reporter: java-junit
 
       - name: Post result status
         id: slack-results
