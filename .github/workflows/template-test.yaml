@@ -96,7 +96,8 @@ jobs:
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-test-results
           client-payload: '{"test_run": "${{ github.run_id }}",
-                            "branch": "${{ inputs.branch }}"}'
+                            "branch": "${{ inputs.branch }}",
+                            "sha": "${{inputs.image-tag }}"}'
 
       - name: Post status
         if: ${{ steps.test.outcome == 'failed' }}
