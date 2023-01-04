@@ -42,7 +42,7 @@ jobs:
         uses: dawidd6/action-download-artifact@v2
         with:
           path: hb
-          run_id: ${{ inputs.test_run }}
+          run_id: ${{ inputs.test-run }}
 
       - name: Get Results
         id: results
