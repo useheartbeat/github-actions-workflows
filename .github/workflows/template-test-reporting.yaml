@@ -1,0 +1,75 @@
+on:
+  workflow_call:
+    inputs:
+      test-run:
+        required: true
+        type: string
+      sha:
+        required: true
+        type: string
+      branch:
+        required: true
+        type: string
+      test-path:
+        required: true
+        type: string
+
+jobs:
+  report:
+    runs-on: ubuntu-20.04
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout service repo
+        id: checkout-app
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.branch }}
+          path: hb
+
+      - name: Checkout working sha
+        id: checkout-sha
+        run: |
+          cd hb && git checkout ${{ inputs.sha }}
+
+      - name: Download artifact
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v2
+        with:
+          path: hb
+          run_id: ${{ inputs.test_run }}
+
+      - name: Get Results
+        id: results
+        uses: dorny/test-reporter@v1.6.0
+        with:
+          name: JUnit Tests
+          working-directory: hb
+          path: ${{ inputs.test-path }}
+          reporter: java-junit
+
+      - name: Post result status
+        id: slack-results
+        if: ${{ steps.results.outcome == 'success' }}
+        uses: act10ns/slack@v2.0.0
+        with:
+          status: ${{ steps.results.outcome }}
+          channel: '#github-actions'
+          message: ${{ steps.results.outputs.passed }} out of ${{ steps.results.outputs.total }} tests passed. ${{ steps.results.outputs.failed }} failed. Logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Post final status
+        id: slack-results-final
+        if: ${{ steps.slack-results.outcome == 'skipped' }}
+        uses: act10ns/slack@v2.0.0
+        with:
+          status: ${{ job.status }}
+          channel: '#github-actions'
+          message: Failed to complete reporting for tests. Logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}

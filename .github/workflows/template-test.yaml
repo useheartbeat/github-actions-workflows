@@ -95,7 +95,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           repository: useheartbeat/heartbeat-${{ inputs.service }}
           event-type: trigger-test-results
-          client-payload: '{"test_run": "${{ github.run_id }}",
+          client-payload: '{"test-run": "${{ github.run_id }}",
                             "branch": "${{ inputs.branch }}",
                             "sha": "${{inputs.image-tag }}"}'
 
