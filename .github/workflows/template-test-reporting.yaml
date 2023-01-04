@@ -18,9 +18,10 @@ jobs:
   report:
     runs-on: ubuntu-20.04
 
-    permissions:
-      id-token: write
-      contents: write
+    permissions: write-all
+      # id-token: write
+      # contents: write
+      # checks: write
 
     steps:
       - name: Checkout service repo
