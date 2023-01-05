@@ -52,6 +52,7 @@ jobs:
           working-directory: hb
           path: ${{ inputs.test-path }}
           reporter: java-junit
+          list-tests: failed
 
       - name: Post result status
         id: slack-results
