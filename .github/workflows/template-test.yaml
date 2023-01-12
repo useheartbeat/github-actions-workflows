@@ -108,14 +108,3 @@ jobs:
           message: Failed to complete tests for ${{ inputs.service }}:${{ inputs.image-tag }} on ${{ inputs.env }}. Logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      # if on the main branch, deploy to prod with
-      - name: Trigger deploy to Prod
-        if: ${{ (startsWith(inputs.branch, 'master') || startsWith(inputs.branch, 'main')) && steps.results.outputs.failed == 0 }}
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          repository: useheartbeat/heartbeat-${{ inputs.service }}
-          event-type: trigger-prod-deploy
-          client-payload: '{"sha": "${{ inputs.image-tag }}",
-                            "branch": "${{ inputs.branch }}"}'
