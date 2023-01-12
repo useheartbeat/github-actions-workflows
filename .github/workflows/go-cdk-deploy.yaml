@@ -53,7 +53,7 @@ jobs:
 
       - name: Deploy User stack
         working-directory: ./cdk-infra
-        run: cdk deploy -c envName=${{ inputs.env }} HBHPartnerUserPoolStack
+        run: cdk deploy -c envName=${{ inputs.env }} HBHPartnerUserPoolStack HBHPartnerUsers
         
       - name: Clear context
         working-directory: ./cdk-infra
