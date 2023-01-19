@@ -6,8 +6,13 @@ on:
         type: string
 
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-20.04
+
+    outputs:
+      image-tag: ${{ steps.sha.outputs.sha_short }}
+      branch: ${{ steps.branch.outputs.branch }}
+      branch-current: ${{ steps.checkCurrent.outputs.current }}
 
     permissions:
       id-token: write
@@ -86,19 +91,3 @@ jobs:
           message: Build ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}.
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      - name: Trigger deploy to Dev
-        if: |
-          steps.checkCurrent.outputs.current == 'True' &&
-          (startsWith(steps.branch.outputs.branch, 'hotfix') ||
-          startsWith(steps.branch.outputs.branch, 'feature') ||
-          startsWith(steps.branch.outputs.branch, 'fix') ||
-          startsWith(steps.branch.outputs.branch, 'test') ||
-          github.ref == 'refs/heads/main' ||
-          github.ref == 'refs/heads/master')
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          repository: useheartbeat/heartbeat-${{ inputs.service }}
-          event-type: trigger-dev-deploy
-          client-payload: '{"sha": "${{ steps.sha.outputs.sha_short }}","branch": "${{ steps.branch.outputs.branch }}"}'

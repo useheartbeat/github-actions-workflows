@@ -18,6 +18,9 @@ jobs:
   report:
     runs-on: ubuntu-20.04
 
+    outputs:
+      failed-count: ${{ steps.failed-count.outputs.failed }}
+
     permissions: write-all
       # id-token: write
       # contents: write
@@ -56,6 +59,10 @@ jobs:
           list-suites: 'failed'
           max-annotations: '50'
 
+      - name: Export failed test count
+        id: failed-count
+        run: echo "failed=${{ steps.results.outputs.failed }}" >> $GITHUB_OUTPUT
+
       - name: Post result status
         id: slack-results
         if: ${{ steps.results.outcome == 'success' || steps.results.outcome == 'failed' }}
@@ -77,14 +84,3 @@ jobs:
           message: Failed to complete reporting for tests. Logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      # if on the main branch, deploy to prod with
-      - name: Trigger deploy to Prod
-        if: ${{ (startsWith(inputs.branch, 'master') || startsWith(inputs.branch, 'main')) && steps.results.outputs.failed == 0 }}
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          repository: useheartbeat/heartbeat-${{ inputs.service }}
-          event-type: trigger-prod-deploy
-          client-payload: '{"sha": "${{ inputs.image-tag }}",
-                            "branch": "${{ inputs.branch }}"}'

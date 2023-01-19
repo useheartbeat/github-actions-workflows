@@ -54,10 +54,8 @@ jobs:
           aws-region: us-east-1
           role-session-name: actions-${{ inputs.env }}
 
-#Deploy to <env> namespace if branch name does not start with test/**, otherwise skip and just trigger tests
       - name: Helmfile sync
         id: Helm-sync
-        if: ${{ !startsWith(inputs.branch, 'test') }}
         env:
           SERVICE: hb-${{ inputs.service }}
           IMAGE_TAG: ${{ inputs.image-tag }}
@@ -76,15 +74,3 @@ jobs:
           message: Deploy ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-
-      - name: Trigger tests
-        if: ${{ inputs.env != 'prod' }}
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          repository: useheartbeat/heartbeat-${{ inputs.service }}
-          event-type: trigger-tests
-          client-payload: '{"sha": "${{ inputs.image-tag }}",
-                            "iam_role": "${{ inputs.iam-role }}",
-                            "env": "${{ inputs.env }}",
-                            "branch": "${{ inputs.branch }}"}'

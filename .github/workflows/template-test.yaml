@@ -88,17 +88,6 @@ jobs:
           name: test-results
           path: '**/build/test-results/**/*.xml'
 
-      - name: Trigger Test Results
-        if: ${{ steps.test.conclusion == 'success' }}
-        uses: peter-evans/repository-dispatch@v2
-        with:
-          token: ${{ secrets.GH_TOKEN }}
-          repository: useheartbeat/heartbeat-${{ inputs.service }}
-          event-type: trigger-test-results
-          client-payload: '{"test-run": "${{ github.run_id }}",
-                            "branch": "${{ inputs.branch }}",
-                            "sha": "${{inputs.image-tag }}"}'
-
       - name: Post status
         if: ${{ steps.test.outcome == 'failed' }}
         uses: act10ns/slack@v2.0.0
