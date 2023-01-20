@@ -13,6 +13,10 @@ on:
       test-path:
         required: true
         type: string
+    outputs:
+      failed-count: 
+        description: Number of failed tests
+        value: ${{ jobs.report.outputs.failed-count }}
 
 jobs:
   report:

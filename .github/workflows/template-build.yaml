@@ -4,6 +4,16 @@ on:
       service:
         required: true
         type: string
+    outputs:
+      image-tag:
+        description: Short sha used for Docker image versioning
+        value: ${{ jobs.build.outputs.image-tag }}
+      branch: 
+        description: Current branch name
+        value: ${{ jobs.build.outputs.branch }}
+      branch-current: 
+        description: Boolean indicating if branch is up to date with main
+        value: ${{ jobs.build.outputs.current }}
 
 jobs:
   build:
