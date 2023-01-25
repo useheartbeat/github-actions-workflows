@@ -18,7 +18,7 @@ on:
         type: string
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-20.04
 
     permissions:
@@ -79,7 +79,7 @@ jobs:
           PR: ${{ inputs.pr }}
         run: |
           chmod +x ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/pr-preview.sh
-          ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/integ-test.sh $PR us-east-1 preview $SERVICE $IMAGE_TAG
+          ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/pr-preview.sh $PR us-east-1 preview $SERVICE $IMAGE_TAG
         shell: bash
 
       - name: Post final status
