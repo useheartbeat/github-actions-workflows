@@ -11,7 +11,7 @@ on:
         required: true
         type: string
       image-tag:
-        required: true
+        required: false
         type: string
       pr:
         required: true
