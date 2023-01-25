@@ -1,0 +1,93 @@
+on:
+  workflow_call:
+    inputs:
+      service:
+        required: true
+        type: string
+      env:
+        required: true
+        type: string
+      iam-role:
+        required: true
+        type: string
+      image-tag:
+        required: true
+        type: string
+      pr:
+        required: true
+        type: string
+
+jobs:
+  test:
+    runs-on: ubuntu-20.04
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Slack status
+        if: always()
+        uses: act10ns/slack@v2.0.0
+        with:
+          status: starting
+          channel: '#github-actions'
+          message: Starting Preview for ${{ inputs.service }}:${{ inputs.image-tag }} PR ${{ inputs.pr }}...
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Checkout service repo
+        id: checkout-app
+        uses: actions/checkout@v3
+        with:
+          path: ${{ inputs.service }}
+          ref: EOP-105-k8s-deploy
+
+      - name: Check out helmfile repo
+        id: checkout-helm
+        uses: actions/checkout@v3
+        with:
+          repository: useheartbeat/helmfile
+          token: ${{ secrets.GH_TOKEN }}
+          path: helmfile
+
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v1-node16
+        with:
+          role-to-assume: ${{ inputs.iam-role }}
+          aws-region: us-east-1
+          role-session-name: actions-${{ inputs.env }}
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.20.0'
+        id: install-kubectl
+
+      - name: Setup helmfile
+        id: setup-helm
+        uses: mamezou-tech/setup-helmfile@v1.2.0
+
+      - name: Run preview script
+        id: preview
+        continue-on-error: true
+        env:
+          SERVICE: hb-${{ inputs.service }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
+          ENV: ${{ inputs.env }}
+          PR: ${{ inputs.pr }}
+        run: |
+          chmod +x ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/pr-preview.sh
+          ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/integ-test.sh $PR us-east-1 preview $SERVICE $IMAGE_TAG
+        shell: bash
+
+      - name: Post final status
+        if: always()
+        uses: act10ns/slack@v2.0.0
+        with:
+          status: ${{ job.status }}
+          channel: '#github-actions'
+          message: Preview ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
