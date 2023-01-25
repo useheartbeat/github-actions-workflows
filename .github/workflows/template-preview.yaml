@@ -71,7 +71,6 @@ jobs:
 
       - name: Run preview script
         id: preview
-        continue-on-error: true
         env:
           SERVICE: hb-${{ inputs.service }}
           IMAGE_TAG: ${{ inputs.image-tag }}
