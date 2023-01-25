@@ -16,6 +16,9 @@ on:
       pr:
         required: true
         type: string
+      close:
+        required: true
+        type: boolean
 
 jobs:
   deploy:
@@ -70,15 +73,27 @@ jobs:
         uses: mamezou-tech/setup-helmfile@v1.2.0
 
       - name: Run preview script
+        if: inputs.close != true
         id: preview
         env:
           SERVICE: hb-${{ inputs.service }}
           IMAGE_TAG: ${{ inputs.image-tag }}
-          ENV: ${{ inputs.env }}
           PR: ${{ inputs.pr }}
         run: |
           chmod +x ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/pr-preview.sh
           ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/pr-preview.sh $PR us-east-1 preview $SERVICE $IMAGE_TAG
+        shell: bash
+
+      - name: Cleanup preview
+        if: ${{ inputs.close }}
+        id: preview-remove
+        env:
+          SERVICE: hb-${{ inputs.service }}
+          ENV: ${{ inputs.env }}
+          PR: ${{ inputs.pr }}
+        run: |
+          aws eks --region us-east-1 update-kubeconfig --name $ENV-us-east-1-eks
+          kubectl delete ns $PR-preview-$SERVICE
         shell: bash
 
       - name: Post final status
