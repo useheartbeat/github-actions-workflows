@@ -53,7 +53,7 @@ jobs:
 
       - name: Deploy User stack
         working-directory: ./cdk-infra
-        run: cdk deploy -c envName=${{ inputs.env }} HBHPartnerUserPoolStack HBHPartnerUsers
+        run: cdk deploy --require-approval never -c envName=${{ inputs.env }} HBHPartnerUserPoolStack HBHPartnerUsers
         
       - name: Clear context
         working-directory: ./cdk-infra
@@ -61,5 +61,5 @@ jobs:
 
       - name: Deploy GW stack
         working-directory: ./cdk-infra
-        run: cdk deploy -c envName=${{ inputs.env }} HBHPartnerApiGwStack
+        run: cdk deploy --require-approval never -c envName=${{ inputs.env }} HBHPartnerApiGwStack
         
