@@ -61,5 +61,5 @@ jobs:
 
       - name: Deploy GW stack
         working-directory: ./cdk-infra
-        run: cdk deploy --require-approval never -c envName=${{ inputs.env }} HBHPartnerApiGwStack
+        run: cdk deploy --require-approval never -c envName=${{ inputs.env }} HBHPartnerImportVpcStack HBHPartnerApiGwStack
         
