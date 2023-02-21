@@ -14,7 +14,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version: '1.18.x'
+          go-version: '1.16.x'
       - name: Get Dependencies
         working-directory: ${{ inputs.go_project_dir_root }}
         run: go get -d ./...
