@@ -87,9 +87,9 @@ jobs:
           git checkout $DEFAULT_BRANCH
           git checkout -
           if ! git merge-base --is-ancestor $DEFAULT_BRANCH HEAD; then
-            echo "current=False" >> $GITHUB_OUTPUT
+            echo "current=false" >> $GITHUB_OUTPUT
           else
-             echo "current=True" >> $GITHUB_OUTPUT
+             echo "current=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Post final status
