@@ -1,0 +1,29 @@
+name: Rust Build Test
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: false
+        type: string
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install latest stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Run build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --verbose
+      - name: Run test
+        uses: actions-rs/cargo@v1
+        with:
+          command: test
+          args: --verbose
