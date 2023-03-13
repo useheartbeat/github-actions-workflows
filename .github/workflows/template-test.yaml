@@ -16,10 +16,17 @@ on:
       branch:
         required: true
         type: string
+    outputs:
+      test-run: 
+        description: Run ID of the test run
+        value: ${{ jobs.test.outputs.test-run }}
 
 jobs:
   test:
     runs-on: ubuntu-20.04
+
+    outputs:
+      test-run: ${{ steps.run_id.outputs.test-run }}
 
     permissions:
       id-token: write
@@ -67,6 +74,10 @@ jobs:
       - name: Setup helmfile
         id: setup-helm
         uses: mamezou-tech/setup-helmfile@v1.2.0
+
+      - name: Get run if
+        id: run_id
+        run: echo "test-run=${{ github.run_id }}" >> $GITHUB_OUTPUT
 
       - name: Run test script
         id: test
