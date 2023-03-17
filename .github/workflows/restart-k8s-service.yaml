@@ -51,4 +51,4 @@ jobs:
         run: |
           AWS_DEFAULT_REGION=us-east-1
           aws eks --region us-east-1 update-kubeconfig --name $ENV-us-east-1-eks
-          kubectl rollout restart hb-$SERVICE -n $ENV
+          kubectl rollout restart $SERVICE -n $ENV
