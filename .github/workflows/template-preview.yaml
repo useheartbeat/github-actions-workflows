@@ -92,7 +92,12 @@ jobs:
           PR: ${{ inputs.pr }}
         run: |
           aws eks --region us-east-1 update-kubeconfig --name $ENV-us-east-1-eks
-          kubectl delete ns $PR-preview-$SERVICE
+          kubectl get ns | grep $PR-preview-$SERVICE
+          if [ $? -eq 0 ]; then
+            kubectl delete ns $PR-preview-$SERVICE
+          else
+            echo "No namespace to clean up"
+          fi
         shell: bash
 
       - name: Post final status
