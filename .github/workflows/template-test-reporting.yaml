@@ -44,9 +44,12 @@ jobs:
         run: |
           cd hb && git checkout ${{ inputs.sha }}
 
+      - name: Sleep
+        run: sleep 60
+
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2
+        uses: dawidd6/action-download-artifact@v3
         with:
           path: hb
           name: test-results
