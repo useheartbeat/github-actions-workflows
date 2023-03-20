@@ -50,6 +50,7 @@ jobs:
         with:
           path: hb
           name: test-results
+          search_artifacts: true
           run_id: ${{ inputs.test-run }}
 
       - name: Get Results
