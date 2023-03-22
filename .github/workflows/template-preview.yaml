@@ -27,6 +27,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
+      pull-requests: write
 
     steps:
       - name: Slack status
@@ -82,6 +83,14 @@ jobs:
           chmod +x ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/pr-preview.sh
           ${GITHUB_WORKSPACE}/${{ inputs.service }}/.github/scripts/pr-preview.sh $PR us-east-1 preview $SERVICE $IMAGE_TAG
         shell: bash
+
+      - name: Add PR comment
+        if: inputs.close != true
+        id: preview-link
+        uses: mshick/add-pr-comment@v2
+        with:
+          message: |
+            Check out the PR preview at: ${{ steps.preview.outputs.preview_url }}
 
       - name: Cleanup preview
         if: ${{ inputs.close }}
