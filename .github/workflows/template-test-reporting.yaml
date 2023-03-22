@@ -49,12 +49,16 @@ jobs:
 
       - name: Download artifact
         id: download-artifact
-        uses: dawidd6/action-download-artifact@v2.26.0
+        uses: actions/download-artifact@v3
         with:
-          path: hb
           name: test-results
-          search_artifacts: true
-          run_id: ${{ inputs.test-run }}
+          path: hb
+        # uses: dawidd6/action-download-artifact@v2.26.0
+        # with:
+        #   path: hb
+        #   name: test-results
+        #   search_artifacts: true
+        #   run_id: ${{ inputs.test-run }}
 
       - name: Get Results
         id: results
