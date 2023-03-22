@@ -65,7 +65,7 @@ jobs:
         uses: dorny/test-reporter@v1.6.0
         with:
           name: JUnit Tests
-          working-directory: hb
+          working-directory: ${{steps.download-artifact.outputs.download-path}}
           path: ${{ inputs.test-path }}
           reporter: java-junit
           list-tests: 'failed'
