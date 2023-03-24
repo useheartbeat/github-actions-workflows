@@ -60,6 +60,9 @@ jobs:
         #   search_artifacts: true
         #   run_id: ${{ inputs.test-run }}
 
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
+
       - name: Get Results
         id: results
         uses: dorny/test-reporter@v1.6.0
