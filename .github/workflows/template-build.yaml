@@ -71,9 +71,6 @@ jobs:
         id: branch
         run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
 
-      - name: Setup upterm session
-        uses: lhotari/action-upterm@v1
-
       - name: Build, tag, and push image to Amazon ECR (non-Vite)
         id: build
         if: inputs.env == ''
@@ -86,6 +83,15 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
+      - name: AWS Creds file
+        id: creds-file
+        if: inputs.env != ''
+        run: |
+          echo "[default]" > .aws/credentials
+          echo "aws_access_key_id = ${AWS_ACCESS_KEY_ID}" >> .aws/credentials
+          echo "aws_secret_access_key = ${AWS_SECRET_ACCESS_KEY}" >> .aws/credentials
+          echo "aws_session_token = ${AWS_SESSION_TOKEN}" >> .aws/credentials
+
       - name: Build, tag, and push image to Amazon ECR (Vite services)
         id: build-vite
         if: inputs.env != ''
@@ -97,8 +103,14 @@ jobs:
           REGION: us-east-1
         run: |
           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker buildx build --build-arg env=$ENV --build-arg ssm_path=/$ENV/$REGION/terraform/$ECR_REPOSITORY --build-arg AWS_DEFAULT_REGION=$REGION --secret id=aws,src=$HOME/.aws/credentials -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker buildx build --build-arg env=$ENV --build-arg ssm_path=/$ENV/$REGION/terraform/$ECR_REPOSITORY --build-arg AWS_DEFAULT_REGION=$REGION --secret id=aws,src=.aws/credentials -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+
+      - name: Remove AWS Creds file
+        id: rm-creds-file
+        if: inputs.env != ''
+        run: |
+          rm -rf .aws/credentials
 
       - name: Check if branch is up to date
         id: checkCurrent
