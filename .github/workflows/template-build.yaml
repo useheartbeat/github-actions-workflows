@@ -60,6 +60,9 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
       - name: Set short SHA
         id: sha
         run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -70,7 +73,7 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR (non-Vite)
         id: build
-        if: ${{ !inputs.env != '' }}
+        if: inputs.env == ''
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: hb-${{ inputs.service }}
@@ -91,7 +94,7 @@ jobs:
           REGION: us-east-1
         run: |
           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          DOCKER_BUILDKIT=1 docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg env=$ENV --build-arg ssm_path=/$ENV/$REGION/terraform/$ECR_REPOSITORY --build-arg AWS_DEFAULT_REGION=$REGION --secret id=aws,src=$HOME/.aws/credentials .
+          docker buildx -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg env=$ENV --build-arg ssm_path=/$ENV/$REGION/terraform/$ECR_REPOSITORY --build-arg AWS_DEFAULT_REGION=$REGION --secret id=aws,src=$HOME/.aws/credentials .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Check if branch is up to date
