@@ -70,6 +70,7 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR (non-Vite)
         id: build
+        if: {{ !inputs.env != '' }}
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: hb-${{ inputs.service }}
