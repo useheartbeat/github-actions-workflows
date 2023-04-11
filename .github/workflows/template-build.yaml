@@ -105,8 +105,7 @@ jobs:
           REGION: us-east-1
         run: |
           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker buildx build --build-arg env=$ENV --build-arg ssm_path=/$ENV/$REGION/terraform/$ECR_REPOSITORY --build-arg AWS_DEFAULT_REGION=$REGION --secret id=aws,src=.aws/credentials -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker buildx build --build-arg env=$ENV --build-arg ssm_path=/$ENV/$REGION/terraform/$ECR_REPOSITORY --build-arg AWS_DEFAULT_REGION=$REGION --secret id=aws,src=.aws/credentials -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
 
       - name: Remove AWS Creds file
         id: rm-creds-file
