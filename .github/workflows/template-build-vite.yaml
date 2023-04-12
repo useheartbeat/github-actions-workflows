@@ -117,7 +117,7 @@ jobs:
           REGION: us-east-1
         run: |
           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker buildx build --build-arg env=$ENV -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
+          docker buildx build --build-arg ENV=$ENV -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
 
       - name: Check if branch is up to date
         id: checkCurrent
