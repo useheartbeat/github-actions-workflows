@@ -103,6 +103,7 @@ jobs:
           echo "Env vars set"
 
       - name: Setup upterm session
+        if: inputs.env != ''
         uses: lhotari/action-upterm@v1
 
       - name: Build, tag, and push image to Amazon ECR (Vite services)
