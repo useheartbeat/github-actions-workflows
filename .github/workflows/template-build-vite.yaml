@@ -90,10 +90,6 @@ jobs:
           set -x # continue verbose logging
           echo "Env vars set"
 
-      - name: Setup upterm session
-        if: inputs.env != ''
-        uses: lhotari/action-upterm@v1
-
       - name: Configure AWS credentials (ops)
         id: creds-ops
         uses: aws-actions/configure-aws-credentials@v2
