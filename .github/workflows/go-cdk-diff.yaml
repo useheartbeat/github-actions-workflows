@@ -38,14 +38,22 @@ jobs:
       - name: Get modules
         working-directory: ./cdk-infra
         run: |
-          go mod download       
+          go mod download
 
-      - name: Configure aws credentials
+      - name: Determine IAM Role
+        id: iam
+        env:
+          ENV: ${{ inputs.env }}
+        run: |
+          [[ "$ENV" == "prod" ]] && echo "iam_role=arn:aws:iam::098444936620:role/GitHubRole" >> $GITHUB_OUTPUT || echo "iam_role=arn:aws:iam::701248519518:role/GitHubRole" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS credentials
+        id: creds
         uses: aws-actions/configure-aws-credentials@v2
         with:
-          role-to-assume: arn:aws:iam::${{ inputs.account-id }}:role/GitHubRole
+          role-to-assume: ${{ steps.iam.outputs.iam_role }}
+          aws-region: us-east-1
           role-session-name: actions-${{ inputs.env }}
-          aws-region: 'us-east-1'
 
       - name: Clear context
         working-directory: ./cdk-infra
