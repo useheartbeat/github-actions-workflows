@@ -1,0 +1,29 @@
+name: Monitor OpenAPI changes
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: false
+        type: string
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+jobs:
+  openapi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install latest stable
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+      - name: Copy openapi.yaml
+        run: cp openapi.yaml openapi.yaml_bak
+        shell: bash
+      - name: Generate OpenAPI specification
+        uses: actions-rs/cargo@v1
+        with:
+          command: run --bin gen-openapi
+          args: --verbose
+      - name: Compare files
+        run: diff --side-by-side openapi.yaml openapi.yaml_bak
