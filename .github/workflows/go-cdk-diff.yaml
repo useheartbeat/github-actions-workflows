@@ -1,0 +1,68 @@
+on:
+  workflow_call:
+    inputs:
+      env:
+        required: true
+        type: string
+
+jobs:
+  aws_cdk:
+    runs-on: ubuntu-latest
+    container: 
+      image: ghcr.io/useheartbeat/heartbeat-go-cdk-dockerfile:main
+      credentials:
+        username: hbh-github
+        password: ${{ secrets.GH_TOKEN }}
+
+    permissions:
+      id-token: write
+      contents: read
+
+    name: Deploy
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/go-build
+            ~/go/pkg/mod            
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+                        ${{ runner.os }}-go-
+
+      - name: Get modules
+        working-directory: ./cdk-infra
+        run: |
+          go mod download
+
+      - name: Determine IAM Role
+        id: iam
+        env:
+          ENV: ${{ inputs.env }}
+        run: |
+          [[ "$ENV" == "prod" ]] && echo "iam_role=arn:aws:iam::098444936620:role/GitHubRole" >> $GITHUB_OUTPUT || echo "iam_role=arn:aws:iam::701248519518:role/GitHubRole" >> $GITHUB_OUTPUT
+
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: ${{ steps.iam.outputs.iam_role }}
+          aws-region: us-east-1
+          role-session-name: actions-${{ inputs.env }}
+
+      - name: Clear context
+        working-directory: ./cdk-infra
+        run: cdk context --clear
+
+      - name: Synth
+        working-directory: ./cdk-infra
+        run: cdk synth -c envName=${{ inputs.env }}
+
+      - name: Diff
+        working-directory: ./cdk-infra
+        run: cdk diff -c envName=${{ inputs.env }}
+      
+        
+        
