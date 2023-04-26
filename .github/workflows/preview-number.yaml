@@ -1,0 +1,34 @@
+on:
+  workflow_call:
+    inputs:
+      manualPr:
+        required: false
+        type: string
+      ghPr:
+        required: false
+        type: string
+    outputs:
+      pr:
+        description: PR number
+        value: ${{ jobs.calc-pr.outputs.pr }}
+
+jobs:
+  calc-pr:
+    runs-on: ubuntu-20.04
+
+    outputs:
+      pr: ${{ steps.calc-pr.outputs.pr }}
+
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - name: Find valid PR number
+        id: calc-pr
+        env:
+          MANUAL_PR: ${{ inputs.manualPr }}
+          GITHUB_PR: ${{ inputs.ghPr }}
+        run: |
+          [[ ! -z "$MANUAL_PR" ]] && echo "pr=$MANUAL_PR" >> $GITHUB_OUTPUT || echo "pr=$GITHUB_PR" >> $GITHUB_OUTPUT
+        shell: bash
