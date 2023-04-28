@@ -108,7 +108,7 @@ jobs:
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: hb-${{ inputs.service }}
-          IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
+          IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}-${{ inputs.env }}
           ENV: ${{ inputs.env }}
           REGION: us-east-1
         run: |
