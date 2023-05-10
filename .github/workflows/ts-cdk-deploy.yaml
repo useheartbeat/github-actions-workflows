@@ -8,34 +8,20 @@ on:
 jobs:
   aws_cdk:
     runs-on: ubuntu-latest
-    container: 
-      image: ghcr.io/useheartbeat/heartbeat-go-cdk-dockerfile:main
-      credentials:
-        username: hbh-github
-        password: ${{ secrets.GH_TOKEN }}
 
     permissions:
       id-token: write
       contents: read
 
-    name: Diff
+    name: Deploy
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cache/go-build
-            ~/go/pkg/mod            
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-                        ${{ runner.os }}-go-
-
       - name: Get modules
         working-directory: ./cdk-infra
         run: |
-          go mod download
+          npm install -g aws-cdk && npm install       
 
       - name: Determine IAM Role
         id: iam
@@ -58,11 +44,9 @@ jobs:
 
       - name: Synth
         working-directory: ./cdk-infra
-        run: cdk synth -c envName=${{ inputs.env }}
+        run: cdk synth
 
-      - name: Diff
+      - name: Deploy
         working-directory: ./cdk-infra
-        run: cdk diff -c envName=${{ inputs.env }}
-      
-        
+        run: cdk deploy --require-approval never --all
         
