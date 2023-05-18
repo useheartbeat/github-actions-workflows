@@ -90,6 +90,13 @@ jobs:
           set -x # continue verbose logging
           echo "Env vars set"
 
+      - name: Set up npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+          registry-url: "https://npm.ops-useast1.heartbeathealth.com"
+          always-auth: true
+
       - name: Configure AWS credentials (ops)
         id: creds-ops
         uses: aws-actions/configure-aws-credentials@v2
@@ -112,6 +119,7 @@ jobs:
           ENV: ${{ inputs.env }}
           REGION: us-east-1
         run: |
+          npm install
           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           docker buildx build --build-arg ENV=$ENV -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
 
