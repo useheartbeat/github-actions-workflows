@@ -1,0 +1,69 @@
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Slack status
+        if: always()
+        uses: act10ns/slack@v2.0.0
+        with:
+          status: starting
+          channel: '#github-actions'
+          message: Starting Astronomer Build and Push...
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set short SHA
+        id: sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Get branch name
+        id: branch
+        run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Docker Build
+        id: build
+        env:
+          REGISTRY: registry.gcp0001.us-east4.astronomer.io
+          REPOSITORY: galactic-meteor-1505/airflow
+          IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
+        run: |
+          echo "building: $REGISTRY/REPOSITORY:ci-$IMAGE_TAG"
+          docker build -t $REGISTRY/REPOSITORY:ci-$IMAGE_TAG .
+
+      - name: Docker Push
+        id: push
+        if: github.ref == 'refs/heads/master'
+        env:
+          REGISTRY: registry.gcp0001.us-east4.astronomer.io
+          REPOSITORY: galactic-meteor-1505/airflow
+          IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
+          ASTRONOMER_USER: ${{ secrets.ASTRONOMER_USER }}
+          ASTRONOMER_PW: ${{ secrets.ASTRONOMER_PW }}
+        run: |
+          echo "pushing: $REGISTRY/REPOSITORY:ci-$IMAGE_TAG"
+          docker login $REGISTRY -u $ASTRONOMER_USER -p $ASTRONOMER_PW
+          docker push $REGISTRY/REPOSITORY:ci-$IMAGE_TAG
+
+      - name: Post final status
+        if: always()
+        uses: act10ns/slack@v2.0.0
+        with:
+          status: ${{ job.status }}
+          channel: '#github-actions'
+          message: Build ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
