@@ -41,8 +41,8 @@ jobs:
           REPOSITORY: galactic-meteor-1505/airflow
           IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
         run: |
-          echo "building: $REGISTRY/REPOSITORY:ci-$IMAGE_TAG"
-          docker build -t $REGISTRY/REPOSITORY:ci-$IMAGE_TAG .
+          echo "building: $REGISTRY/$REPOSITORY:ci-$IMAGE_TAG"
+          docker build -t $REGISTRY/$REPOSITORY:ci-$IMAGE_TAG .
 
       - name: Docker Push
         id: push
@@ -54,9 +54,9 @@ jobs:
           ASTRONOMER_USER: ${{ secrets.ASTRONOMER_USER }}
           ASTRONOMER_PW: ${{ secrets.ASTRONOMER_PW }}
         run: |
-          echo "pushing: $REGISTRY/REPOSITORY:ci-$IMAGE_TAG"
+          echo "pushing: $REGISTRY/$REPOSITORY:ci-$IMAGE_TAG"
           docker login $REGISTRY -u $ASTRONOMER_USER -p $ASTRONOMER_PW
-          docker push $REGISTRY/REPOSITORY:ci-$IMAGE_TAG
+          docker push $REGISTRY/$REPOSITORY:ci-$IMAGE_TAG
 
       - name: Post final status
         if: always()
