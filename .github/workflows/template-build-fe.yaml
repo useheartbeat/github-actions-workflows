@@ -4,12 +4,6 @@ on:
       service:
         required: true
         type: string
-      env:
-        required: true
-        type: string
-      iam-role:
-        required: true
-        type: string
     outputs:
       image-tag:
         description: Short sha used for Docker image versioning
@@ -26,7 +20,7 @@ jobs:
     runs-on: ubuntu-20.04
 
     outputs:
-      image-tag: ${{ steps.sha.outputs.sha_short }}-${{ inputs.env }}
+      image-tag: ${{ steps.sha.outputs.sha_short }}
       branch: ${{ steps.branch.outputs.branch }}
       branch-current: ${{ steps.checkCurrent.outputs.current }}
 
@@ -51,54 +45,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Set short SHA
-        id: sha
-        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
-
-      - name: Get branch name
-        id: branch
-        run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
-
-      - name: Configure AWS credentials (env vars)
-        id: creds-env
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          role-to-assume: ${{ inputs.iam-role }}
-          aws-region: us-east-1
-          role-session-name: actions-${{ inputs.env }}
-
-      - name: Generate env file for vite services
-        id: env-file
-        if: inputs.env != ''
-        env:
-          ENV: ${{ inputs.env }}
-          AWS_DEFAULT_REGION: us-east-1
-          SSM_PATH: /${{ inputs.env }}/us-east-1/hb-${{ inputs.service }}
-          SERVICE: ${{ inputs.service }}
-        run: |
-          wget https://github.com/Droplr/aws-env/raw/master/bin/aws-env-linux-amd64 -O aws-env
-          chmod u+x aws-env
-          [[ "$ENV" == "prod" ]] && export env_full=production || export env_full=development
-          touch .env.${env_full}
-          set +x # avoid logging secrets
-          AWS_ENV_PATH=${SSM_PATH} AWS_REGION=${AWS_DEFAULT_REGION} ./aws-env --format=dotenv > .env.${env_full}
-          AWS_ENV_PATH=/${ENV}/${AWS_DEFAULT_REGION}/global AWS_REGION=${AWS_DEFAULT_REGION} ./aws-env --format=dotenv >> .env.${env_full}
-          AWS_ENV_PATH=/${ENV}/${AWS_DEFAULT_REGION}/terraform/hb-${SERVICE} AWS_REGION=${AWS_DEFAULT_REGION} ./aws-env --format=dotenv >> .env.${env_full}
-          set -x # continue verbose logging
-          echo "Env vars set"
-
-      - name: Set up npm
-        uses: actions/setup-node@v3
-        with:
-          node-version: "16.x"
-          registry-url: "https://npm.ops-useast1.heartbeathealth.com"
-          always-auth: true
-
-      - name: Configure AWS credentials (ops)
-        id: creds-ops
+      - name: Configure AWS credentials
+        id: creds
         uses: aws-actions/configure-aws-credentials@v2
         with:
           role-to-assume: arn:aws:iam::631720813209:role/GitHubRole
@@ -109,20 +57,36 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1.6.0
 
-      - name: Build, tag, and push image to Amazon ECR (Vite services)
-        id: build-vite
-        if: inputs.env != ''
+      - name: Set short SHA
+        id: sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Get branch name
+        id: branch
+        run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Set up npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+          registry-url: "https://npm.ops-useast1.heartbeathealth.com"
+          always-auth: true
+
+      - name: Install dependencies
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm ci --ignore-scripts
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: hb-${{ inputs.service }}
-          IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}-${{ inputs.env }}
-          ENV: ${{ inputs.env }}
-          REGION: us-east-1
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
         run: |
-          npm ci --ignore-scripts
           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker buildx build --build-arg ENV=$ENV -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Check if branch is up to date
         id: checkCurrent
