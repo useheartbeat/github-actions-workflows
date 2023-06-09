@@ -45,6 +45,12 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Git SSH config
+        id: ssh
+        uses: webfactory/ssh-agent@v0.8.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Configure AWS credentials
         id: creds
         uses: aws-actions/configure-aws-credentials@v2
@@ -73,7 +79,7 @@ jobs:
           IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
         run: |
           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
+          docker buildx build --ssh default=${{ env.SSH_AUTH_SOCK }} -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
       - name: Check if branch is up to date
