@@ -90,6 +90,13 @@ jobs:
           set -x # continue verbose logging
           echo "Env vars set"
 
+      - name: Set up npm
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+          registry-url: "https://npm.ops-useast1.heartbeathealth.com"
+          always-auth: true
+
       - name: Configure AWS credentials (ops)
         id: creds-ops
         uses: aws-actions/configure-aws-credentials@v2
@@ -100,7 +107,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v1.6.0
 
       - name: Build, tag, and push image to Amazon ECR (Vite services)
         id: build-vite
@@ -111,7 +118,9 @@ jobs:
           IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}-${{ inputs.env }}
           ENV: ${{ inputs.env }}
           REGION: us-east-1
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
+          npm ci --ignore-scripts
           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
           docker buildx build --build-arg ENV=$ENV -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
 
