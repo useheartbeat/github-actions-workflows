@@ -65,7 +65,7 @@ jobs:
           ENV: ${{ inputs.env }}
           NAMESPACE: ${{ inputs.namespace }}
         run: |
-          NS=${NAMESPACE:-ENV}
+          NS=${NAMESPACE:-$ENV}
           AWS_DEFAULT_REGION=us-east-1 helm repo add hbh s3://hbh-helm-charts
           aws eks --region us-east-1 update-kubeconfig --name $ENV-us-east-1-eks
           env=$ENV region=us-east-1 ns=$NS image_tag=$IMAGE_TAG helmfile -f stable/$SERVICE.yaml sync
