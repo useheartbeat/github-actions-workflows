@@ -22,9 +22,6 @@ jobs:
         run: cp openapi.yaml openapi.yaml_bak
         shell: bash
       - name: Generate OpenAPI specification
-        uses: actions-rs/cargo@v1
-        with:
-          command: run
-          args: --bin gen-openapi --verbose
+        run: cargo run --bin gen-openapi --verbose
       - name: Compare files
         run: diff --side-by-side openapi.yaml openapi.yaml_bak
