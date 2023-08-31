@@ -64,7 +64,7 @@ jobs:
 
       - name: Configure AWS credentials (env vars)
         id: creds-env
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: ${{ inputs.iam-role }}
           aws-region: us-east-1
@@ -99,7 +99,7 @@ jobs:
 
       - name: Configure AWS credentials (ops)
         id: creds-ops
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: arn:aws:iam::631720813209:role/GitHubRole
           aws-region: us-east-1
@@ -107,7 +107,7 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1.6.2
+        uses: aws-actions/amazon-ecr-login@v1.7.0
 
       - name: Build, tag, and push image to Amazon ECR (Vite services)
         id: build-vite
