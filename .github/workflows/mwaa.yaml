@@ -1,0 +1,66 @@
+on:
+  workflow_call:
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Slack status
+        if: always()
+        uses: act10ns/slack@v2.0.0
+        with:
+          status: starting
+          channel: '#github-actions'
+          message: Starting MWAA S3 upload...
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          role-to-assume: arn:aws:iam::078979183997:role/GitHubRole
+          aws-region: us-east-1
+          role-session-name: actions-data
+
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Set short SHA
+        id: sha
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+
+      - name: Get branch name
+        id: branch
+        run: echo "branch=${GITHUB_REF_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Upload to S3
+        id: push
+        if: github.ref == 'refs/heads/master'
+        run: |
+          echo "Uploading DAGs..."
+          aws s3 cp dags/ s3://data-us-east-1-hbh-dags/dags --recursive
+          echo "Uploading requirements.txt..."
+          aws s3 cp requirements.txt s3://data-us-east-1-hbh-dags
+          echo "Zipping and uploading plugins..."
+          zip -r plugins.zip plugins
+          aws s3 cp plugins.zip s3://data-us-east-1-hbh-dags
+          
+
+      - name: Post final status
+        if: always()
+        uses: act10ns/slack@v2.0.0
+        with:
+          status: ${{ job.status }}
+          channel: '#github-actions'
+          message: Upload ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}.
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
