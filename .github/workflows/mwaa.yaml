@@ -69,7 +69,7 @@ jobs:
           while [ "$status" != "AVAILABLE" ]
           do
               echo "MWAA updating..."
-              status=$(aws mwaa get-environment --name data-us-east-1-mwaa | jq '.[].Status')
+              status=$(aws mwaa get-environment --name data-us-east-1-mwaa | jq '.[].Status' | tr -d '"')
               sleep 20  
           done
           echo "MWAA updated..."
