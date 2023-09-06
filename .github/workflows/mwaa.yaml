@@ -63,7 +63,7 @@ jobs:
           export plugins_version=$(aws s3api list-object-versions --bucket data-us-east-1-hbh-dags --prefix plugins | jq -r '.Versions[0].VersionId')
           export startup_version=$(aws s3api list-object-versions --bucket data-us-east-1-hbh-dags --prefix startup | jq -r '.Versions[0].VersionId')
           export requirements_version=$(aws s3api list-object-versions --bucket data-us-east-1-hbh-dags --prefix requirements | jq -r '.Versions[0].VersionId')
-          aws mwaa update-environment --plugins-s3-object-version $plugins_version --requirements-s3-object-version $requirements_version --startup-script-s3-object-version $startup_version
+          aws mwaa update-environment --name data-us-east-1-mwaa --plugins-s3-object-version $plugins_version --requirements-s3-object-version $requirements_version --startup-script-s3-object-version $startup_version
 
           status="NA"
           while [ "$status" != "AVAILABLE" ]
