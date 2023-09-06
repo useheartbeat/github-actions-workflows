@@ -53,7 +53,15 @@ jobs:
           echo "Zipping and uploading plugins..."
           zip -r plugins.zip plugins
           aws s3 cp plugins.zip s3://data-us-east-1-hbh-dags
-          
+
+      - name: Update MWAA env
+        id: update-mwaa
+        if: github.ref == 'refs/heads/master'
+        run: |
+          export plugins_version=$(aws s3api list-object-versions --bucket data-us-east-1-hbh-dags --prefix plugins | jq -r '.Versions[0].VersionId')
+          export startup_version=$(aws s3api list-object-versions --bucket data-us-east-1-hbh-dags --prefix startup | jq -r '.Versions[0].VersionId')
+          export requirements_version=$(aws s3api list-object-versions --bucket data-us-east-1-hbh-dags --prefix requirements | jq -r '.Versions[0].VersionId')
+          aws mwaa update-environment --plugins-s3-object-version $plugins_version --requirements-s3-object-version $requirements_version --startup-script-s3-object-version $startup_version
 
       - name: Post final status
         if: always()
