@@ -50,6 +50,8 @@ jobs:
           aws s3 cp dags/ s3://data-us-east-1-hbh-dags/dags --recursive
           echo "Uploading requirements.txt..."
           aws s3 cp requirements.txt s3://data-us-east-1-hbh-dags
+          echo "Uploading startup.sh"
+          aws s3 cp mwaa/startup.sh s3://data-us-east-1-hbh-dags
           echo "Zipping and uploading plugins..."
           zip -r plugins.zip plugins
           aws s3 cp plugins.zip s3://data-us-east-1-hbh-dags
