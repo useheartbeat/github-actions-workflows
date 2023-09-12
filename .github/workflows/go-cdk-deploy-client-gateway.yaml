@@ -41,7 +41,7 @@ jobs:
           go mod download       
 
       - name: Configure aws credentials
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: arn:aws:iam::${{ inputs.account-id }}:role/GitHubRole
           role-session-name: actions-${{ inputs.env }}
