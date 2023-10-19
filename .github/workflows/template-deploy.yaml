@@ -44,7 +44,7 @@ jobs:
 
       - name: Check out helmfile repo
         id: checkout-helm
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: useheartbeat/helmfile
           token: ${{ secrets.GH_TOKEN }}
