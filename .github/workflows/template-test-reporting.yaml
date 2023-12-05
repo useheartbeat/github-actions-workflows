@@ -56,7 +56,7 @@ jobs:
 
       - name: Get Results
         id: results
-        uses: dorny/test-reporter@v1.6.0
+        uses: dorny/test-reporter@v1.7.0
         with:
           name: JUnit Tests
           working-directory: ${{steps.download-artifact.outputs.download-path}}
