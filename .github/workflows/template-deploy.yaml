@@ -40,7 +40,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Setup helmfile
-        uses: mamezou-tech/setup-helmfile@v1.2.0
+        uses: mamezou-tech/setup-helmfile@v1.3.0
 
       - name: Check out helmfile repo
         id: checkout-helm
