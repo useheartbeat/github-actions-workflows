@@ -40,7 +40,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Setup helmfile
-        uses: mamezou-tech/setup-helmfile@v1.2.0
+        uses: mamezou-tech/setup-helmfile@v1.3.0
 
       - name: Check out helmfile repo
         id: checkout-helm
@@ -51,7 +51,7 @@ jobs:
 
       - name: Configure AWS credentials
         id: creds
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ inputs.iam-role }}
           aws-region: us-east-1
