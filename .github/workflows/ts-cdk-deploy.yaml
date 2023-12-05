@@ -16,7 +16,7 @@ jobs:
     name: Deploy
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Get modules
         working-directory: ./cdk-infra
@@ -32,7 +32,7 @@ jobs:
 
       - name: Configure AWS credentials
         id: creds
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ steps.iam.outputs.iam_role }}
           aws-region: us-east-1

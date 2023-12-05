@@ -42,13 +42,13 @@ jobs:
 
       - name: Checkout service repo
         id: checkout-app
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           path: ${{ inputs.service }}
 
       - name: Check out helmfile repo
         id: checkout-helm
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: useheartbeat/helmfile
           token: ${{ secrets.GH_TOKEN }}
@@ -56,7 +56,7 @@ jobs:
 
       - name: Configure AWS credentials
         id: creds
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ inputs.iam-role }}
           aws-region: us-east-1
@@ -70,7 +70,7 @@ jobs:
 
       - name: Setup helmfile
         id: setup-helm
-        uses: mamezou-tech/setup-helmfile@v1.2.0
+        uses: mamezou-tech/setup-helmfile@v1.3.0
 
       - name: Run preview script
         if: inputs.close != true

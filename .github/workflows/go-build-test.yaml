@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Setup Go
         uses: actions/setup-go@v4
         with:
-          go-version: '1.19.x'
+          go-version: '1.21.x'
       - name: Get Dependencies
         working-directory: ${{ inputs.go_project_dir_root }}
         run: go get -d ./...

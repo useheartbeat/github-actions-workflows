@@ -21,7 +21,7 @@ jobs:
     name: Diff
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - uses: actions/cache@v3
         with:
@@ -46,7 +46,7 @@ jobs:
 
       - name: Configure AWS credentials
         id: creds
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           role-to-assume: ${{ steps.iam.outputs.iam_role }}
           aws-region: us-east-1
