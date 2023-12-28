@@ -5,6 +5,10 @@ on:
       env:
         required: false
         type: string
+      rust_version:
+        required: false
+        type: string
+        default: stable
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: -D warnings
@@ -17,7 +21,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Install latest stable
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@${{rust_version}}
       - name: Run build
         run: cargo build --verbose --all-features
       - name: Run test
