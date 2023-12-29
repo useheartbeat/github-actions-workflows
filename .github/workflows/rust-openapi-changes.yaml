@@ -17,7 +17,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Install latest stable
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@1.74.1
       - name: Copy openapi.yaml
         run: cp openapi.yaml openapi.yaml_bak
         shell: bash
