@@ -21,7 +21,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Install latest stable
-        uses: dtolnay/rust-toolchain@${{github.event.inputs.rust_version}}
+        uses: dtolnay/rust-toolchain@${{ inputs.rust_version }}
       - name: Run build
         run: cargo build --verbose --all-features
       - name: Run test

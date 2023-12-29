@@ -22,7 +22,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Install latest stable
-        uses: dtolnay/rust-toolchain@${{github.event.inputs.rust_version}}
+        uses: dtolnay/rust-toolchain@${{ inputs.rust_version }}
         with:
           components: rustfmt, clippy
       - name: Run rustfmt
