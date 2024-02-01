@@ -70,7 +70,7 @@ jobs:
 
       - name: Setup helmfile
         id: setup-helm
-        uses: mamezou-tech/setup-helmfile@v1.3.0
+        uses: mamezou-tech/setup-helmfile@v2.0.0
 
       - name: Run preview script
         if: inputs.close != true
