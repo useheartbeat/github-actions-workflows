@@ -1,0 +1,18 @@
+name: Exit if not default branch
+on:
+  workflow_call
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Exit if the branch is not master
+      run: |
+        DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
+        if [[ "${{ github.ref }}" != "$DEFAULT_BRANCH" ]]; then
+          echo "Branch is not default branch ($DEFAULT_BRANCH), exiting."
+          exit 0
+        fi
