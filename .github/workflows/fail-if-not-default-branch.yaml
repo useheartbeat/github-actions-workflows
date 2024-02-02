@@ -1,4 +1,4 @@
-name: Exit if not default branch
+name: Fail if not default branch
 on:
   workflow_call
 jobs:
