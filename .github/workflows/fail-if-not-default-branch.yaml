@@ -12,7 +12,7 @@ jobs:
     - name: Exit if the branch is not master
       run: |
         DEFAULT_BRANCH="${{ github.event.repository.default_branch }}"
-        if [[ "${{ github.ref }}" != "$DEFAULT_BRANCH" ]]; then
+        if [[ "${{ github.ref }}" != "refs/heads/$DEFAULT_BRANCH" ]]; then
           echo "Branch is not default branch ($DEFAULT_BRANCH), exiting with failure"
           exit 1
         fi
