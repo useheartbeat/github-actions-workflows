@@ -43,9 +43,9 @@ jobs:
 
         - name: Setup Terragrunt version 0.27.3
           id: setup-tg
-          uses: autero1/action-terragrunt@v1.1.0
+          uses: autero1/action-terragrunt@v3
           with:
-            terragrunt_version: 0.27.3
+            terragrunt-version: 0.27.3
 
         - name: Configure AWS credentials
           id: creds
@@ -57,3 +57,5 @@ jobs:
 
         - name: Setup upterm session
           uses: lhotari/action-upterm@v1
+          with:
+            limit-access-to-actor: true
