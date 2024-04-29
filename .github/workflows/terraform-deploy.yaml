@@ -55,13 +55,24 @@ jobs:
             aws-region: us-east-1
             role-session-name: actions-${{ inputs.env }}
 
+        - name: create directory to pass ssh-agent socket
+          id: ssh-dir
+          run: "mkdir -p /home/runner/work/_temp/_github_tf"
+          shell: bash
+
+        - uses: webfactory/ssh-agent@v0.9.0
+          id: ssh-setup
+          with:
+            ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+            ssh-auth-sock: "/home/runner/work/_temp/_github_tf/ssh-agent.sock"
+
         - name: Terrgrunt Plan
           id: tg-plan
           env:
             ENV: ${{ inputs.env }}
             SERVICE: ${{ inputs.service }}
+            SSH_AUTH_SOCK: "/github/workflow/ssh-agent.sock"
           run: |
-            ssh -T -oStrictHostKeyChecking=accept-new git@github.com || true
             cd $(ls | grep "hbh-"$ENV | head -n 1)
             pwd && ls
             cd $SERVICE
