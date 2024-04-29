@@ -62,6 +62,7 @@ jobs:
             SERVICE: ${{ inputs.service }}
           run: |
             cd "$(/bin/ls -t1 | grep $ENV | head -n 1)"
+            pwd && ls
             cd $SERVICE
             terragrunt init && terragrunt plan
 
