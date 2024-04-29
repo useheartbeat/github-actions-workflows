@@ -55,7 +55,22 @@ jobs:
             aws-region: us-east-1
             role-session-name: actions-${{ inputs.env }}
 
-        - name: Setup upterm session
-          uses: lhotari/action-upterm@v1
+        - name: Terrgrunt Plan
+          id: tg-plan
+          env:
+            ENV: ${{ inputs.env }}
+            SERVICE: ${{ inputs.service }}
+          run: |
+            cd "$(/bin/ls -t1 | grep $ENV | head -n 1)"
+            cd $SERVICE
+            terragrunt init && terragrunt plan
+
+        - name: Post final status
+          if: always()
+          uses: act10ns/slack@v2.1.0
           with:
-            limit-access-to-actor: true
+            status: ${{ job.status }}
+            channel: '#github-actions'
+            message: Deploy ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
