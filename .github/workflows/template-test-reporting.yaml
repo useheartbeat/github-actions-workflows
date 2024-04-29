@@ -73,7 +73,7 @@ jobs:
       - name: Post result status
         id: slack-results
         if: ${{ steps.results.outcome == 'success' || steps.results.outcome == 'failed' }}
-        uses: act10ns/slack@v2.0.0
+        uses: act10ns/slack@v2.1.0
         with:
           status: ${{ steps.results.outcome }}
           channel: '#github-actions'
@@ -84,7 +84,7 @@ jobs:
       - name: Post final status
         id: slack-results-final
         if: ${{ steps.slack-results.outcome == 'skipped' }}
-        uses: act10ns/slack@v2.0.0
+        uses: act10ns/slack@v2.1.0
         with:
           status: ${{ job.status }}
           channel: '#github-actions'
