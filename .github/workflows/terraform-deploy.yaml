@@ -1,0 +1,60 @@
+on:
+    workflow_call:
+      inputs:
+        service:
+          required: true
+          type: string
+        env:
+          required: true
+          type: string
+        iam-role:
+          required: true
+          type: string
+  
+jobs:
+    deploy:
+      runs-on: ubuntu-22.04
+  
+      permissions:
+        id-token: write
+        contents: read
+  
+      steps:
+        - name: Slack status
+          if: always()
+          uses: act10ns/slack@v2.0.0
+          with:
+            status: starting
+            channel: '#github-actions'
+            message: Starting Deploy for ${{ inputs.service }} to ${{ inputs.env }}...
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  
+        - name: Check out repo
+          id: checkout
+          uses: actions/checkout@v4
+
+        - name: Setup Terraform v1.6.5
+          id: setup-tf
+          uses: hashicorp/setup-Terraform@v3
+          with:
+            terraform_version: 1.6.5
+            terraform_wrapper: true
+
+        - name: Setup Terragrunt version 0.27.3
+          id: setup-tg
+          uses: autero1/action-terragrunt@v1.1.0
+          with:
+            terragrunt_version: 0.27.3
+            token: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Configure AWS credentials
+          id: creds
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            role-to-assume: ${{ inputs.iam-role }}
+            aws-region: us-east-1
+            role-session-name: actions-${{ inputs.env }}
+
+        - name: Setup upterm session
+          uses: lhotari/action-upterm@v1
