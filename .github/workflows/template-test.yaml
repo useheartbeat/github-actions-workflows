@@ -35,7 +35,7 @@ jobs:
     steps:
       - name: Slack status
         if: always()
-        uses: act10ns/slack@v2.0.0
+        uses: act10ns/slack@v2.1.0
         with:
           status: starting
           channel: '#github-actions'
@@ -66,7 +66,7 @@ jobs:
           role-session-name: actions-${{ inputs.env }}
 
       - name: Install kubectl
-        uses: azure/setup-kubectl@v3
+        uses: azure/setup-kubectl@v4
         with:
           version: 'v1.20.0'
         id: install-kubectl
@@ -101,7 +101,7 @@ jobs:
 
       - name: Post status
         if: ${{ steps.test.outcome == 'failed' }}
-        uses: act10ns/slack@v2.0.0
+        uses: act10ns/slack@v2.1.0
         with:
           status: ${{ job.status }}
           channel: '#github-actions'
