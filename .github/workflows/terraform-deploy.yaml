@@ -46,7 +46,6 @@ jobs:
           uses: autero1/action-terragrunt@v1.1.0
           with:
             terragrunt_version: 0.27.3
-            token: ${{ secrets.GITHUB_TOKEN }}
 
         - name: Configure AWS credentials
           id: creds
