@@ -61,6 +61,7 @@ jobs:
             ENV: ${{ inputs.env }}
             SERVICE: ${{ inputs.service }}
           run: |
+            ssh -T -oStrictHostKeyChecking=accept-new git@github.com || true
             cd $(ls | grep "hbh-"$ENV | head -n 1)
             pwd && ls
             cd $SERVICE
