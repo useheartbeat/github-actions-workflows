@@ -71,13 +71,13 @@ jobs:
           env:
             ENV: ${{ inputs.env }}
             SERVICE: ${{ inputs.service }}
-            # SSH_AUTH_SOCK: "/github/workflow/ssh-agent.sock"
           run: |
             ssh -T -oStrictHostKeyChecking=accept-new git@github.com || true
             cd $(ls | grep "hbh-"$ENV | head -n 1)
             pwd && ls
             cd $SERVICE
             terragrunt init && terragrunt plan
+            terragrunt run-all apply --terragrunt-non-interactive
 
         - name: Post final status
           if: always()
