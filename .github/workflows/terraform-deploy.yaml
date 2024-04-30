@@ -12,7 +12,7 @@ on:
           type: string
         diff_only:
           required: false
-          type: boolean
+          type: string
   
 jobs:
     deploy:
