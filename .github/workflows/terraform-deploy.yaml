@@ -10,6 +10,9 @@ on:
         iam-role:
           required: true
           type: string
+        diff_only:
+          required: false
+          type: boolean
   
 jobs:
     deploy:
@@ -71,12 +74,14 @@ jobs:
           env:
             ENV: ${{ inputs.env }}
             SERVICE: ${{ inputs.service }}
+            DIFF_ONLY: $${{ inputs.diff_only }}
           run: |
             ssh -T -oStrictHostKeyChecking=accept-new git@github.com || true
             cd $(ls | grep "hbh-"$ENV | head -n 1)
             pwd && ls
             cd $SERVICE
             terragrunt init && terragrunt plan
+            if [ "$DIFF_ONLY" = "false" ] || [ "$DIFF_ONLY" = false ]; then
             terragrunt run-all apply --terragrunt-non-interactive
 
         - name: Post final status
