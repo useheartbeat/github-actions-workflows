@@ -1,0 +1,95 @@
+on:
+    workflow_call:
+      inputs:
+        service:
+          required: true
+          type: string
+        env:
+          required: true
+          type: string
+        iam-role:
+          required: true
+          type: string
+        diff_only:
+          required: false
+          type: string
+  
+jobs:
+    deploy:
+      runs-on: ubuntu-22.04
+  
+      permissions:
+        id-token: write
+        contents: read
+  
+      steps:
+        - name: Slack status
+          if: always()
+          uses: act10ns/slack@v2.0.0
+          with:
+            status: starting
+            channel: '#github-actions'
+            message: Starting Deploy for ${{ inputs.service }} to ${{ inputs.env }}...
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+  
+        - name: Check out repo
+          id: checkout
+          uses: actions/checkout@v4
+
+        - name: Setup Terraform v1.6.5
+          id: setup-tf
+          uses: hashicorp/setup-Terraform@v3
+          with:
+            terraform_version: 1.6.5
+            terraform_wrapper: true
+
+        - name: Setup Terragrunt version 0.27.3
+          id: setup-tg
+          uses: autero1/action-terragrunt@v3
+          with:
+            terragrunt-version: 0.27.3
+
+        - name: Configure AWS credentials
+          id: creds
+          uses: aws-actions/configure-aws-credentials@v4
+          with:
+            role-to-assume: ${{ inputs.iam-role }}
+            aws-region: us-east-1
+            role-session-name: actions-${{ inputs.env }}
+
+        - name: create directory to pass ssh-agent socket
+          id: ssh-dir
+          run: "mkdir -p /home/runner/work/_temp/_github_tf"
+          shell: bash
+
+        - uses: webfactory/ssh-agent@v0.9.0
+          id: ssh-setup
+          with:
+            ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+            ssh-auth-sock: "/home/runner/work/_temp/_github_tf/ssh-agent.sock"
+
+        - name: Terrgrunt Plan
+          id: tg-plan
+          env:
+            ENV: ${{ inputs.env }}
+            SERVICE: ${{ inputs.service }}
+            DIFF_ONLY: $${{ inputs.diff_only }}
+          run: |
+            ssh -T -oStrictHostKeyChecking=accept-new git@github.com || true
+            cd $(ls | grep "hbh-"$ENV | head -n 1)
+            pwd && ls
+            cd $SERVICE
+            terragrunt init && terragrunt plan
+            if [ "$DIFF_ONLY" = "false" ] || [ "$DIFF_ONLY" = false ]; then
+            terragrunt run-all apply --terragrunt-non-interactive
+
+        - name: Post final status
+          if: always()
+          uses: act10ns/slack@v2.1.0
+          with:
+            status: ${{ job.status }}
+            channel: '#github-actions'
+            message: Deploy ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          env:
+            SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
