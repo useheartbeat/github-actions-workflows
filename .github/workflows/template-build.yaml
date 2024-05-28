@@ -52,10 +52,10 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
 
-      - uses: nexB/scancode-action@alpha
+      - name: Run GitHub Action for ORT
+        uses: oss-review-toolkit/ort-ci-github-action@v1
         with:
-          pipelines: "scan_codebase"
-          output-formats: "json xlsx"
+          allow-dynamic-versions: 'true'
 
       - name: Configure AWS credentials
         id: creds
