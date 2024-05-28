@@ -51,6 +51,12 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
+
+      - uses: nexB/scancode-action@alpha
+        with:
+          pipelines: "scan_codebase"
+          output-formats: "json xlsx"
+
       - name: Configure AWS credentials
         id: creds
         uses: aws-actions/configure-aws-credentials@v4
