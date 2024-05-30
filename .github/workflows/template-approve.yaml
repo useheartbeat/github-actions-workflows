@@ -1,0 +1,26 @@
+on:
+    workflow_call:
+        inputs:
+            service:
+                required: true
+                type: string
+            version:
+                required: true
+                type: string
+
+jobs:
+    request-approval:
+        runs-on: ubuntu-22.04
+
+        permissions:
+            id-token: write
+            contents: read
+
+        steps:
+            - name: approve-prod-deploy
+              uses: trstringer/manual-approval@v1
+              with:
+                secret: ${{ github.TOKEN }}
+                approvers: JamesGennoy,darbytron,lobeto99
+                minimum-approvals: 1
+                exclude-workflow-initiator-as-approver: true
