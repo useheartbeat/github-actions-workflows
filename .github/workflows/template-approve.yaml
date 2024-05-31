@@ -24,10 +24,14 @@ jobs:
               with:
                 app_id: ${{ secrets.APPROVAL_GH_APP_ID }}
                 private_key: ${{ secrets.APPROVAL_GH_APP_KEY }}
+            - name: determine-pr-url
+              uses: kceb/pull-request-url-action@v1
+              id: pr-url
             - name: approve-prod-deploy
               uses: trstringer/manual-approval@v1
               with:
                 secret: ${{ steps.generate_token.outputs.token }}
                 approvers: Engineering,Product
                 minimum-approvals: 1
+                issue-body: ${{ steps.pr-url.outputs.url }}
                 exclude-workflow-initiator-as-approver: true
