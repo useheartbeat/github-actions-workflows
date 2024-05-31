@@ -18,10 +18,16 @@ jobs:
             issues: write
 
         steps:
+            - name: Generate token
+              id: generate_token
+              uses: tibdex/github-app-token@v1
+              with:
+                app_id: ${{ secrets.APPROVAL_GH_APP_ID }}
+                private_key: ${{ secrets.APPROVAL_GH_APP_KEY }}
             - name: approve-prod-deploy
               uses: trstringer/manual-approval@v1
               with:
-                secret: ${{ github.TOKEN }}
-                approvers: JamesGennoy,darbytron,lobeto99
+                secret: ${{ steps.generate_token.outputs.token }}
+                approvers: Engineering,Product
                 minimum-approvals: 1
                 exclude-workflow-initiator-as-approver: true
