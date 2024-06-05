@@ -24,10 +24,14 @@ jobs:
               with:
                 app_id: ${{ secrets.APPROVAL_GH_APP_ID }}
                 private_key: ${{ secrets.APPROVAL_GH_APP_KEY }}
-            - name: approve-prod-deploy
+            - name: Get PR info
+              id: pr-info
+              run: echo "pull_number=$(jq --raw-output .pull_request.number '$GITHUB_EVENT_PATH')" >> $GITHUB_OUTPUT
+            - name: Approve Prod Deploy
               uses: trstringer/manual-approval@v1
               with:
                 secret: ${{ steps.generate_token.outputs.token }}
                 approvers: Engineering,Product
                 minimum-approvals: 1
+                issue-body: ${{ github.server_url }}/${{ github.repository }}/pull/${{ steps.pr-info.outputs.pull_number }}
                 exclude-workflow-initiator-as-approver: true
