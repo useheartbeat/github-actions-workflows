@@ -27,8 +27,9 @@ jobs:
             - name: Get PR info
               id: pr-info
               env:
+                SERVICE: ${{ inputs.service }}
                 GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: echo "pull_number=$(gh pr ls -s merged --json number --jq '.[0]["number"]')" >> $GITHUB_OUTPUT
+              run: echo "pull_number=$(gh pr ls -s merged --repo useheartbeat/$SERVICE --json number --jq '.[0]["number"]')" >> $GITHUB_OUTPUT
             - name: Approve Prod Deploy
               uses: trstringer/manual-approval@v1
               with:
