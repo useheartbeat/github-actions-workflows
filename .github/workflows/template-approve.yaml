@@ -26,7 +26,9 @@ jobs:
                 private_key: ${{ secrets.APPROVAL_GH_APP_KEY }}
             - name: Get PR info
               id: pr-info
-              run: echo "pull_number=$(jq --raw-output .pull_request.number '$GITHUB_EVENT_PATH')" >> $GITHUB_OUTPUT
+              env:
+                GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+              run: echo "pull_number=$(gh pr ls -s merged --json number --jq '.[0]["number"]')" >> $GITHUB_OUTPUT
             - name: Approve Prod Deploy
               uses: trstringer/manual-approval@v1
               with:
