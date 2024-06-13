@@ -18,10 +18,10 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
-      - name: Get modules
+      - name: Get modules and build
         working-directory: ./cdk-infra
         run: |
-          npm install -g aws-cdk && npm install       
+          npm install -g aws-cdk && npm install && npm run build
 
       - name: Determine IAM Role
         id: iam
