@@ -18,5 +18,7 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
       - name: Install latest stable
         uses: dtolnay/rust-toolchain@stable
+      - name: Run build
+        run: cargo build --profile test --verbose --all-features
       - name: Run test
-        run: cargo test --all-features
+        run: cargo test --verbose --all-features
