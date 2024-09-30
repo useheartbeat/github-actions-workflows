@@ -90,8 +90,7 @@ jobs:
             echo "Cache found"
           else
             echo "Cache not found, building and pushing now"
-            docker buildx build --ssh default=${{ env.SSH_AUTH_SOCK }} -t $ECR_REGISTRY/$ECR_REPOSITORY:buildcache --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} .
-            docker push $ECR_REGISTRY/$ECR_REPOSITORY:buildcache
+            docker buildx build --ssh default=${{ env.SSH_AUTH_SOCK }} -t $ECR_REGISTRY/$ECR_REPOSITORY:buildcache --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} . --push
           fi
       
       - name: Build and push
