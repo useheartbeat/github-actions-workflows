@@ -86,8 +86,7 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: hb-${{ inputs.service }}
         run: |
-          docker pull $ECR_REGISTRY/$ECR_REPOSITORY:buildcache
-          if [ $? -eq 0 ]; then
+          if docker pull $ECR_REGISTRY/$ECR_REPOSITORY:buildcache; then
             echo "Cache found"
           else
             echo "Cache not found, building and pushing now"
