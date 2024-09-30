@@ -100,8 +100,8 @@ jobs:
         with:
           push: true
           tags: ${{ steps.login-ecr.outputs.registry }}/hb-${{ inputs.service }}:${{ steps.sha.outputs.sha_short }}
-          ssh: [default=${{ env.SSH_AUTH_SOCK }}]
-          build-args: [githubUsername=hbh-github, githubToken=${{ secrets.GH_TOKEN }}]
+          ssh: default=${{ env.SSH_AUTH_SOCK }}
+          build-args: githubUsername=hbh-github,githubToken=${{ secrets.GH_TOKEN }}
           cache-from: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/hb-${{ inputs.service }}:buildcache
           cache-to: type=registry,ref=${{ steps.login-ecr.outputs.registry }}/hb-${{ inputs.service }}:buildcache,mode=max
 
