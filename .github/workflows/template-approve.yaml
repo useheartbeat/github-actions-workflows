@@ -35,6 +35,19 @@ jobs:
                 SERVICE: ${{ inputs.service }}
                 GH_TOKEN: ${{ steps.generate_token.outputs.token }}
               run: echo "pull_number=$(gh pr ls -s merged --repo useheartbeat/$SERVICE --json number --jq '.[0]["number"]')" >> $GITHUB_OUTPUT
+            - name: Check for open issues
+              id: check-open-issues
+              env:
+                REPO: ${{ inputs.service }}
+                GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+              run: |
+                FULL_REPO="useheartbeat/$REPO"
+                issues=$(gh issue list -R $FULL_REPO --json number -q '.[].number')
+
+                for issue in $issues
+                do
+                  gh issue close $issue -R $FULL_REPO
+                done
             - name: Approve Prod Deploy
               if: inputs.actor != 'renovate[bot]'
               uses: trstringer/manual-approval@v1
