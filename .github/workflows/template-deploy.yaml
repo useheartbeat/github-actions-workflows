@@ -70,7 +70,27 @@ jobs:
           aws eks --region us-east-1 update-kubeconfig --name $ENV-us-east-1-eks
           env=$ENV region=us-east-1 ns=$NS image_tag=$IMAGE_TAG helmfile -f stable/$SERVICE.yaml sync
 
-      - name: Post final status
+      - name: Post failed status dev
+        if: ${{ steps.Helm-sync.outcome == 'failed' && github.actor != 'renovate[bot]' && inputs.env == 'dev'}}
+        uses: act10ns/slack@v2.1.0
+        with:
+          status: ${{ steps.Helm-sync.outcome }}
+          channel: '#alerts-warning'
+          message: Deploy ${{ steps.Helm-sync.outcome }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Post failed status prod
+        if: ${{ steps.Helm-sync.outcome == 'failed' && github.actor != 'renovate[bot]' && inputs.env == 'prod'}}
+        uses: act10ns/slack@v2.1.0
+        with:
+          status: ${{ steps.Helm-sync.outcome }}
+          channel: '#alerts-severe'
+          message: Deploy ${{ steps.Helm-sync.outcome }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Post status
         if: always()
         uses: act10ns/slack@v2.1.0
         with:
