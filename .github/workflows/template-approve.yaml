@@ -56,4 +56,4 @@ jobs:
                 approvers: Engineering,Product
                 minimum-approvals: 1
                 issue-body: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-                exclude-workflow-initiator-as-approver: true
+                exclude-workflow-initiator-as-approver: false
