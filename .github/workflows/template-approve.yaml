@@ -1,0 +1,59 @@
+on:
+    workflow_call:
+        inputs:
+            service:
+                required: true
+                type: string
+            version:
+                required: true
+                type: string
+            actor:
+                required: true
+                type: string
+
+jobs:
+    request-approval:
+        runs-on: ubuntu-22.04
+
+        permissions:
+            id-token: write
+            contents: read
+            issues: write
+
+        steps:
+            - name: Generate token
+              if: inputs.actor != 'renovate[bot]'
+              id: generate_token
+              uses: tibdex/github-app-token@v2
+              with:
+                app_id: ${{ secrets.APPROVAL_GH_APP_ID }}
+                private_key: ${{ secrets.APPROVAL_GH_APP_KEY }}
+            - name: Get PR info
+              if: inputs.actor != 'renovate[bot]'
+              id: pr-info
+              env:
+                SERVICE: ${{ inputs.service }}
+                GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+              run: echo "pull_number=$(gh pr ls -s merged --repo useheartbeat/$SERVICE --json number --jq '.[0]["number"]')" >> $GITHUB_OUTPUT
+            - name: Check for open issues
+              id: check-open-issues
+              env:
+                REPO: ${{ inputs.service }}
+                GH_TOKEN: ${{ steps.generate_token.outputs.token }}
+              run: |
+                FULL_REPO="useheartbeat/$REPO"
+                issues=$(gh issue list -R $FULL_REPO --json number -q '.[].number')
+
+                for issue in $issues
+                do
+                  gh issue close $issue -R $FULL_REPO
+                done
+            - name: Approve Prod Deploy
+              if: inputs.actor != 'renovate[bot]'
+              uses: trstringer/manual-approval@v1
+              with:
+                secret: ${{ steps.generate_token.outputs.token }}
+                approvers: Engineering,Product
+                minimum-approvals: 1
+                issue-body: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                exclude-workflow-initiator-as-approver: true

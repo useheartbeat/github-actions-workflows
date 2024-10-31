@@ -10,7 +10,7 @@ on:
 
 jobs:
   aws_cdk:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-m
     container: 
       image: ghcr.io/useheartbeat/heartbeat-go-cdk-dockerfile:main
       credentials:
