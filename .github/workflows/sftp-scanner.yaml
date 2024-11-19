@@ -1,4 +1,4 @@
-name: Update ECR Credentials for AKS
+name: SFTP Server Scan
 
 on:
   schedule:
