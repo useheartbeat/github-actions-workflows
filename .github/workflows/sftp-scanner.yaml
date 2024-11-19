@@ -1,0 +1,30 @@
+name: Update ECR Credentials for AKS
+
+on:
+  schedule:
+    - cron: '0 13 * * 1' #every Monday 9 EST
+  workflow_dispatch:
+  
+jobs:
+  scan-sftp:
+    runs-on: ubuntu-22.04
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::098444936620:role/GitHubRole
+          aws-region: us-east-1
+          role-session-name: actions-sftp-scan
+
+      - name: Scan SFTP and log to s3
+        run: |
+          sudo apt update && sudo apt install nmap -y
+          nmap -sV --script ssh2-enum-algos -Pn -p 22 sftp.prod-useast1.heartbeathealth.com > scan.txt
+          date=$(date '+%Y-%m-%d')
+          aws s3 cp scan.txt s3://prod-us-east-1-sftp/server-scans/${date}-scan.txt
