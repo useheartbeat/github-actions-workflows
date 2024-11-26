@@ -112,7 +112,7 @@ jobs:
           fi
 
       - name: Post failed status
-        if: ${{ steps.build.outcome == 'failed' && github.actor != 'renovate[bot]'}}
+        if: ${{ always() && steps.build.outcome == 'failed' && github.actor != 'renovate[bot]'}}
         uses: act10ns/slack@v2.1.0
         with:
           status: ${{ steps.build.outcome }}

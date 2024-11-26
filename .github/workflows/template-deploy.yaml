@@ -71,7 +71,7 @@ jobs:
           env=$ENV region=us-east-1 ns=$NS image_tag=$IMAGE_TAG helmfile -f stable/$SERVICE.yaml sync
 
       - name: Post failed status dev
-        if: ${{ steps.Helm-sync.outcome == 'failed' && github.actor != 'renovate[bot]' && inputs.env == 'dev'}}
+        if: ${{ always() && steps.Helm-sync.outcome == 'failed' && github.actor != 'renovate[bot]' && inputs.env == 'dev'}}
         uses: act10ns/slack@v2.1.0
         with:
           status: ${{ steps.Helm-sync.outcome }}
@@ -81,7 +81,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Post failed status prod
-        if: ${{ steps.Helm-sync.outcome == 'failed' && github.actor != 'renovate[bot]' && inputs.env == 'prod'}}
+        if: ${{ always() && steps.Helm-sync.outcome == 'failed' && github.actor != 'renovate[bot]' && inputs.env == 'prod'}}
         uses: act10ns/slack@v2.1.0
         with:
           status: ${{ steps.Helm-sync.outcome }}
