@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Slack status
-        if: always()
+        if: ${{ github.actor != 'renovate[bot]' }}
         uses: act10ns/slack@v2.1.0
         with:
           status: starting
@@ -111,12 +111,22 @@ jobs:
              echo "current=true" >> $GITHUB_OUTPUT
           fi
 
-      - name: Post final status
-        if: always()
+      - name: Post failed status
+        if: ${{ steps.build.outcome == 'failed' && github.actor != 'renovate[bot]'}}
+        uses: act10ns/slack@v2.1.0
+        with:
+          status: ${{ steps.build.outcome }}
+          channel: '#alerts-warning'
+          message: Build ${{ steps.build.outcome }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Post status
+        if: ${{ github.actor != 'renovate[bot]' }}
         uses: act10ns/slack@v2.1.0
         with:
           status: ${{ job.status }}
           channel: '#github-actions'
-          message: Build ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}.
+          message: Build ${{ job.status }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
