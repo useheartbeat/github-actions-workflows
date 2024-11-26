@@ -111,7 +111,7 @@ jobs:
           fi
 
       - name: Post final status
-        if: always() && ${{ github.actor != 'renovate[bot]' }}
+        if: always() && github.actor != 'renovate[bot]'
         uses: act10ns/slack@v2.1.0
         with:
           status: ${{ job.status }}
