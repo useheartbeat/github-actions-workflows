@@ -122,7 +122,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Post status
-        if: ${{ github.actor != 'renovate[bot]' }}
+        if: always() && github.actor != 'renovate[bot]'
         uses: act10ns/slack@v2.1.0
         with:
           status: ${{ job.status }}

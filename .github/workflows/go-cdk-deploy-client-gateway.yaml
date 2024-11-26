@@ -52,6 +52,15 @@ jobs:
         run: cdk context --clear
 
       - name: Deploy GW stack
+        id: cdk-deploy
         working-directory: ./cdk-infra
         run: cdk deploy --require-approval never -c envName=${{ inputs.env }} HBHClientImportVpcStack HBHClientApiGwStack
+
+      - name: Post failed status
+        if: ${{ steps.cdk-deploy.outcome == 'failed' }}
+        uses: act10ns/slack@v2.1.0
+        with:
+          status: 'failed'
+          channel: '#alerts-warning'
+          message: CDK Deploy failed, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 
