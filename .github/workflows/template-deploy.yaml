@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Slack status
-        if: always()
+        if: ${{ github.actor != 'renovate[bot]' }}
         uses: act10ns/slack@v2.1.0
         with:
           status: starting
@@ -91,7 +91,7 @@ jobs:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
       - name: Post status
-        if: always()
+        if: always() && github.actor != 'renovate[bot]'
         uses: act10ns/slack@v2.1.0
         with:
           status: ${{ job.status }}
