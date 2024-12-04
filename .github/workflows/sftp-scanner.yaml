@@ -40,6 +40,10 @@ jobs:
           python -m pip install semgrep
           python -m pip install python_graphql_client
 
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
       - name: Run scan
         env: 
           HBH_SCAN_SECRET: ${{ secrets.HBH_SCAN_SECRET }}
