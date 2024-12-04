@@ -51,7 +51,7 @@ jobs:
           python ./scripts/scan.py
 
           date=$(date '+%Y-%m-%d')
-          aws s3 cp scripts/nmapoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-sftpscan.txt
-          aws s3 cp scripts/trivyoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-trivyscan.txt
-          aws s3 cp scripts/sgoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-semgrepscan.txt
+          aws s3 cp nmapoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-sftpscan.txt
+          aws s3 cp trivyoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-trivyscan.txt
+          aws s3 cp sgoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-semgrepscan.txt
 
