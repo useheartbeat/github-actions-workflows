@@ -14,6 +14,8 @@ jobs:
       contents: read
 
     steps:
+      - uses: actions/checkout@v4
+
       - name: Configure AWS credentials
         id: creds
         uses: aws-actions/configure-aws-credentials@v4
@@ -22,9 +24,30 @@ jobs:
           aws-region: us-east-1
           role-session-name: actions-sftp-scan
 
-      - name: Scan SFTP and log to s3
+      - name: Install deps
         run: |
-          sudo apt update && sudo apt install nmap -y
-          nmap -sV --script ssh2-enum-algos -Pn -p 22 sftp.prod-useast1.heartbeathealth.com > scan.txt
+          sudo apt update && sudo apt install nmap wget -y
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.18.3/trivy_0.18.3_Linux-64bit.deb
+          sudo dpkg -i trivy_0.18.3_Linux-64bit.deb
+
+      - name: Setup python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.10
+
+      - name: Install utils
+        run: |
+          python -m pip install semgrep
+          python -m pip install python_graphql_client
+
+      - name: Run scan
+        env: 
+          HBH_SCAN_SECRET: ${{ secrets.HBH_SCAN_SECRET }}
+        run: |
+          python ./scripts/scan.py
+
           date=$(date '+%Y-%m-%d')
-          aws s3 cp scan.txt s3://prod-us-east-1-sftp/server-scans/${date}-scan.txt
+          aws s3 cp scripts/nmapoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-sftpscan.txt
+          aws s3 cp scripts/trivyoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-trivyscan.txt
+          aws s3 cp scripts/sgoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-semgrepscan.txt
+
