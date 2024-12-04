@@ -67,6 +67,5 @@ for r in repos:
   else:
     os.system("cd allcode && git clone "+r["sshUrl"])
 # run various scans. requires these utilities to be installed
-os.system("cd allcode && trivy fs . > ../trivyoutput.txt")
-os.system("cd allcode && semgrep scan . > ../sgoutput.txt")
+os.system("cd allcode && ../scripts/semgrep.sh")
 os.system("nmap -sV --script ssh2-enum-algos -Pn -p 22 sftp.prod-useast1.heartbeathealth.com > nmapoutput.txt")

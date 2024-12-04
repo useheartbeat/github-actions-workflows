@@ -49,9 +49,9 @@ jobs:
           HBH_SCAN_SECRET: ${{ secrets.HBH_SCAN_SECRET }}
         run: |
           python ./scripts/scan.py
+          cp allcode/semgreptrivyoutput.txt .
 
           date=$(date '+%Y-%m-%d')
-          aws s3 cp nmapoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-sftpscan.txt
-          aws s3 cp trivyoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-trivyscan.txt
-          aws s3 cp sgoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-semgrepscan.txt
+          aws s3 cp nmapoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-sftp-scan.txt
+          aws s3 cp semgreptrivyoutput.txt s3://prod-us-east-1-sftp/server-scans/${date}-semgrep-trivy-scan.txt
 
