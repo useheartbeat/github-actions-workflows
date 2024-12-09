@@ -82,7 +82,8 @@ jobs:
             cd $SERVICE
             terragrunt init && terragrunt plan
             if [ "$DIFF_ONLY" = "false" ] || [ "$DIFF_ONLY" = false ]; then
-            terragrunt run-all apply --terragrunt-non-interactive
+              terragrunt run-all apply --terragrunt-non-interactive
+            fi
 
         - name: Post final status
           if: always()
