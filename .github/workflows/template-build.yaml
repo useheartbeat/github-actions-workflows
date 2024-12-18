@@ -112,14 +112,14 @@ jobs:
           fi
 
       - name: Post failed status
-        if: ${{ always() && steps.build.outcome == 'failed' && github.actor != 'renovate[bot]'}}
+        if: ${{ always() && steps.build.outcome != 'success' && github.actor != 'renovate[bot]'}}
         uses: act10ns/slack@v2.1.0
         with:
           status: ${{ steps.build.outcome }}
           channel: '#alerts-warning'
           message: Build ${{ steps.build.outcome }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_WARNING }}
 
       - name: Post status
         if: always() && github.actor != 'renovate[bot]'
