@@ -66,10 +66,12 @@ jobs:
         run: cdk deploy --require-approval never -c envName=${{ inputs.env }} HBHPartnerImportVpcStack HBHPartnerApiGwStack
 
       - name: Post failed status
-        if: ${{ steps.cdk-deploy-gw.outcome == 'failed' || steps.cdk-deploy-user.outcome == 'failed'}}
+        if: ${{ always() && steps.cdk-deploy-gw.outcome != 'success' && github.actor != 'renovate[bot]'}}
         uses: act10ns/slack@v2.1.0
         with:
-          status: 'failed'
-          channel: '#alerts-warning'
-          message: CDK Deploy failed, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          status: ${{ steps.cdk-deploy-gw.outcome }}
+          channel: '#alerts-severe'
+          message: Build ${{ steps.cdk-deploy-gw.outcome }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_SEVERE }}
         
