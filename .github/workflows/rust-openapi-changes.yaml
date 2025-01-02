@@ -1,3 +1,4 @@
+
 name: Monitor OpenAPI changes
 on:
   workflow_call:
@@ -8,20 +9,44 @@ on:
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: -D warnings
+  SCCACHE_GHA_ENABLED: "true"
+  RUSTC_WRAPPER: "sccache"
+  SCCACHE_BUCKET: "hbh-sccache"
+  SCCACHE_REGION: "us-east-1"
+  SCCACHE_S3_KEY_PREFIX: ${{ github.event.repository.name }}
 jobs:
   openapi:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     steps:
       - uses: actions/checkout@v4
+
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Configure AWS credentials
+        id: creds
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::631720813209:role/GitHubRole
+          aws-region: us-east-1
+          role-session-name: actions-${{ inputs.env }}
+
       - name: Install latest stable
         uses: dtolnay/rust-toolchain@stable
+
+      - name: Run sccache-cache
+        uses: mozilla-actions/sccache-action@v0.0.7
+
       - name: Copy openapi.yaml
         run: cp openapi.yaml openapi.yaml_bak
         shell: bash
+
       - name: Generate OpenAPI specification
         run: cargo run --bin gen-openapi --verbose
+
       - name: Compare files
         run: diff --side-by-side openapi.yaml openapi.yaml_bak

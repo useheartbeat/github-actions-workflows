@@ -64,6 +64,7 @@ jobs:
           role-to-assume: arn:aws:iam::631720813209:role/GitHubRole
           aws-region: us-east-1
           role-session-name: actions-${{ inputs.env }}
+          output-credentials: true
 
       - name: Login to Amazon ECR
         id: login-ecr
@@ -90,10 +91,16 @@ jobs:
           IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
         run: |
           echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker buildx build . -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --ssh default=${{ env.SSH_AUTH_SOCK }} \
+          docker buildx build \
+          --secret id=aws-access-key-id,env=AWS_ACCESS_KEY_ID \
+          --secret id=aws-secret-access-key,env=AWS_SECRET_ACCESS_KEY \
+          --secret id=aws-session-token,env=AWS_SESSION_TOKEN \
+          . -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+          --ssh default=${{ env.SSH_AUTH_SOCK }} \
           --cache-from type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:buildcache \
           --cache-to mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:buildcache \
-          --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} --push
+          --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} \
+          --push
 
       - name: Check if branch is up to date
         id: checkCurrent
