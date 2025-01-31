@@ -41,6 +41,8 @@ jobs:
 
       - name: Setup helmfile
         uses: mamezou-tech/setup-helmfile@v2.0.0
+        with:
+          helm-s3-plugin-version: v0.16.2
 
       - name: Check out helmfile repo
         id: checkout-helm
