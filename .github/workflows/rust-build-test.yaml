@@ -6,6 +6,7 @@ on:
         required: false
         type: string
 env:
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
   CARGO_TERM_COLOR: always
   RUSTFLAGS: -D warnings
   SCCACHE_GHA_ENABLED: "true"
