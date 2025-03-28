@@ -73,7 +73,7 @@ jobs:
 
       - name: Setup helmfile
         id: setup-helm
-        uses: mamezou-tech/setup-helmfile@v2.0.0
+        uses: mamezou-tech/setup-helmfile@v2.1.0
 
       - name: Get run if
         id: run_id
