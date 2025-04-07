@@ -59,38 +59,38 @@ jobs:
           aws-region: us-east-1
           role-session-name: actions-${{ inputs.env }}
 
-      # - name: Helmfile sync
-      #   id: Helm-sync
-      #   env:
-      #     SERVICE: hb-${{ inputs.service }}
-      #     IMAGE_TAG: ${{ inputs.image-tag }}
-      #     ENV: ${{ inputs.env }}
-      #     NAMESPACE: ${{ inputs.namespace }}
-      #   run: |
-      #     NS=${NAMESPACE:-$ENV}
-      #     AWS_DEFAULT_REGION=us-east-1 helm repo add hbh s3://hbh-helm-charts
-      #     aws eks --region us-east-1 update-kubeconfig --name $ENV-us-east-1-eks
-      #     env=$ENV region=us-east-1 ns=$NS image_tag=$IMAGE_TAG helmfile -f stable/$SERVICE.yaml sync
+      - name: Helmfile sync
+        id: Helm-sync
+        env:
+          SERVICE: hb-${{ inputs.service }}
+          IMAGE_TAG: ${{ inputs.image-tag }}
+          ENV: ${{ inputs.env }}
+          NAMESPACE: ${{ inputs.namespace }}
+        run: |
+          NS=${NAMESPACE:-$ENV}
+          AWS_DEFAULT_REGION=us-east-1 helm repo add hbh s3://hbh-helm-charts
+          aws eks --region us-east-1 update-kubeconfig --name $ENV-us-east-1-eks
+          env=$ENV region=us-east-1 ns=$NS image_tag=$IMAGE_TAG helmfile -f stable/$SERVICE.yaml sync
 
-      # - name: Post failed status dev
-      #   if: ${{ always() && steps.Helm-sync.outcome != 'success' && github.actor != 'renovate[bot]' && inputs.env == 'dev'}}
-      #   uses: act10ns/slack@v2.1.0
-      #   with:
-      #     status: ${{ steps.Helm-sync.outcome }}
-      #     channel: '#alerts-warning'
-      #     message: Deploy ${{ steps.Helm-sync.outcome }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_WARNING }}
+      - name: Post failed status dev
+        if: ${{ always() && steps.Helm-sync.outcome != 'success' && github.actor != 'renovate[bot]' && inputs.env == 'dev'}}
+        uses: act10ns/slack@v2.1.0
+        with:
+          status: ${{ steps.Helm-sync.outcome }}
+          channel: '#alerts-warning'
+          message: Deploy ${{ steps.Helm-sync.outcome }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_WARNING }}
 
-      # - name: Post failed status prod
-      #   if: ${{ always() && steps.Helm-sync.outcome != 'success' && github.actor != 'renovate[bot]' && inputs.env == 'prod'}}
-      #   uses: act10ns/slack@v2.1.0
-      #   with:
-      #     status: ${{ steps.Helm-sync.outcome }}
-      #     channel: '#alerts-severe'
-      #     message: Deploy ${{ steps.Helm-sync.outcome }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-      #   env:
-      #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_SEVERE }}
+      - name: Post failed status prod
+        if: ${{ always() && steps.Helm-sync.outcome != 'success' && github.actor != 'renovate[bot]' && inputs.env == 'prod'}}
+        uses: act10ns/slack@v2.1.0
+        with:
+          status: ${{ steps.Helm-sync.outcome }}
+          channel: '#alerts-severe'
+          message: Deploy ${{ steps.Helm-sync.outcome }}, logs at ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_SEVERE }}
 
       - name: Post status
         if: always() && github.actor != 'renovate[bot]'
