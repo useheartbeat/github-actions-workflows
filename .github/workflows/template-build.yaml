@@ -4,6 +4,9 @@ on:
       service:
         required: true
         type: string
+      ecr_tag:
+        required: false
+        type: string
     outputs:
       image-tag:
         description: Short sha used for Docker image versioning
@@ -13,7 +16,7 @@ on:
         value: ${{ jobs.build.outputs.branch }}
       branch-current: 
         description: Boolean indicating if branch is up to date with main
-        value: ${{ jobs.build.outputs.current }}
+        value: ${{ jobs.build.outputs.branch-current }}
 
 jobs:
   build:
@@ -63,7 +66,7 @@ jobs:
         with:
           role-to-assume: arn:aws:iam::631720813209:role/GitHubRole
           aws-region: us-east-1
-          role-session-name: actions-${{ inputs.env }}
+          role-session-name: actions-build
           output-credentials: true
 
       - name: Login to Amazon ECR
@@ -89,13 +92,21 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           ECR_REPOSITORY: hb-${{ inputs.service }}
           IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
+          ECR_TAG: ${{ inputs.ecr_tag }}
         run: |
-          echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          if [ -z "$ECR_TAG" ]; then
+            echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            REPO_TAG=$IMAGE_TAG
+          else
+            echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_TAG"
+            REPO_TAG=$ECR_TAG
+          fi
+          
           docker buildx build \
           --secret id=aws-access-key-id,env=AWS_ACCESS_KEY_ID \
           --secret id=aws-secret-access-key,env=AWS_SECRET_ACCESS_KEY \
           --secret id=aws-session-token,env=AWS_SESSION_TOKEN \
-          . -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+          . -t $ECR_REGISTRY/$ECR_REPOSITORY:$REPO_TAG \
           --ssh default=${{ env.SSH_AUTH_SOCK }} \
           --cache-from type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:buildcache \
           --cache-to mode=max,image-manifest=true,oci-mediatypes=true,type=registry,ref=$ECR_REGISTRY/$ECR_REPOSITORY:buildcache \
