@@ -10,6 +10,9 @@ on:
       iam-role:
         required: true
         type: string
+      ecr_tag:
+        required: false
+        type: string
     outputs:
       image-tag:
         description: Short sha used for Docker image versioning
@@ -19,7 +22,7 @@ on:
         value: ${{ jobs.build.outputs.branch }}
       branch-current: 
         description: Boolean indicating if branch is up to date with main
-        value: ${{ jobs.build.outputs.current }}
+        value: ${{ jobs.build.outputs.branch-current }}
 
 jobs:
   build:
@@ -119,10 +122,18 @@ jobs:
           ENV: ${{ inputs.env }}
           REGION: us-east-1
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          ECR_TAG: ${{ inputs.ecr_tag }}
         run: |
+          if [ -z "$ECR_TAG" ]; then
+            echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            REPO_TAG=$IMAGE_TAG
+          else
+            echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_TAG"
+            REPO_TAG=$ECR_TAG
+          fi
           npm ci --ignore-scripts
-          echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
-          docker buildx build --build-arg ENV=$ENV -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --push .
+          echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$REPO_TAG"
+          docker buildx build --build-arg ENV=$ENV -t $ECR_REGISTRY/$ECR_REPOSITORY:$REPO_TAG --push .
 
       - name: Check if branch is up to date
         id: checkCurrent
