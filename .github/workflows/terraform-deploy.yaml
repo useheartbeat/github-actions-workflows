@@ -63,7 +63,7 @@ jobs:
           run: "mkdir -p /home/runner/work/_temp/_github_tf"
           shell: bash
 
-        - uses: webfactory/ssh-agent@v0.9.0
+        - uses: webfactory/ssh-agent@v0.9.1
           id: ssh-setup
           with:
             ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
