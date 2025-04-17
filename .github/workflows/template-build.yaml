@@ -95,6 +95,11 @@ jobs:
           IMAGE_TAG: ${{ steps.sha.outputs.sha_short }}
           ECR_TAG: ${{ inputs.ecr_tag }}
         run: |
+          echo $ECR_REGISTRY
+          echo $ECR_REPOSITORY
+          echo $IMAGE_TAG
+          echo $ECR_TAG
+          
           if [ -z "$ECR_TAG" ]; then
             echo "Retagging $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG with $ECR_TAG"
 
@@ -126,21 +131,21 @@ jobs:
           --build-arg githubUsername=hbh-github --build-arg githubToken=${{ secrets.GH_TOKEN }} \
           --push
 
-      - name: Check if branch is up to date
-        id: checkCurrent
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: |
-          set -x
-          DEFAULT_BRANCH=${{ github.event.repository.default_branch }}
-          git fetch
-          git checkout $DEFAULT_BRANCH
-          git checkout -
-          if ! git merge-base --is-ancestor $DEFAULT_BRANCH HEAD; then
-            echo "current=false" >> $GITHUB_OUTPUT
-          else
-             echo "current=true" >> $GITHUB_OUTPUT
-          fi
+      # - name: Check if branch is up to date
+      #   id: checkCurrent
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+      #   run: |
+      #     set -x
+      #     DEFAULT_BRANCH=${{ github.event.repository.default_branch }}
+      #     git fetch
+      #     git checkout $DEFAULT_BRANCH
+      #     git checkout -
+      #     if ! git merge-base --is-ancestor $DEFAULT_BRANCH HEAD; then
+      #       echo "current=false" >> $GITHUB_OUTPUT
+      #     else
+      #        echo "current=true" >> $GITHUB_OUTPUT
+      #     fi
 
       - name: Post failed status
         if: ${{ always() && steps.build.outcome != 'success' && github.actor != 'renovate[bot]'}}
