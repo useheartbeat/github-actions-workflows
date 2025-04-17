@@ -103,7 +103,7 @@ jobs:
 
             if [[ ! "$IMAGE_META" == *"Image not found"* ]]; then
               echo "The image $IMAGE_TAG exists in the repository $ECR_REPOSITORY... retagging."
-              MANIFEST=$(aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG --query 'images[0].imageManifest' --output text | jq -c .)
+              MANIFEST=$(aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG --query 'images[].imageManifest' --output text | jq -c .)
 
               echo $MANIFEST
 
