@@ -55,10 +55,10 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
 
-      - name: Run GitHub Action for ORT
-        uses: oss-review-toolkit/ort-ci-github-action@v1
-        with:
-          allow-dynamic-versions: 'true'
+      # - name: Run GitHub Action for ORT
+      #   uses: oss-review-toolkit/ort-ci-github-action@v1
+      #   with:
+      #     allow-dynamic-versions: 'true'
 
       - name: Configure AWS credentials
         id: creds
@@ -97,15 +97,16 @@ jobs:
           if [ -z "$ECR_TAG" ]; then
             echo "Retagging $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG with $ECR_TAG"
 
-          IMAGE_META="$(aws ecr describe-images --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG 2> /dev/null || echo 'Image not found')"
+            IMAGE_META="$(aws ecr describe-images --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG 2> /dev/null || echo 'Image not found')"
 
-          if [[ "$IMAGE_META" == *"Image not found"* ]]; then
-              echo "The image $IMAGE_TAG does not exist in the repository $REPOSITORY."
-          else
-              echo "The image $IMAGE_TAG exists in the repository $REPOSITORY."
-          fi
+            if [[ "$IMAGE_META" == *"Image not found"* ]]; then
+                echo "The image $IMAGE_TAG does not exist in the repository $REPOSITORY."
+            else
+                echo "The image $IMAGE_TAG exists in the repository $REPOSITORY."
+            fi
 
             REPO_TAG=$IMAGE_TAG
+            exit 0
           else
             echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_TAG"
             REPO_TAG=$ECR_TAG
