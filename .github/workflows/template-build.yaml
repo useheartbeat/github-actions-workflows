@@ -55,10 +55,10 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
 
-      - name: Run GitHub Action for ORT
-        uses: oss-review-toolkit/ort-ci-github-action@v1
-        with:
-          allow-dynamic-versions: 'true'
+      # - name: Run GitHub Action for ORT
+      #   uses: oss-review-toolkit/ort-ci-github-action@v1
+      #   with:
+      #     allow-dynamic-versions: 'true'
 
       - name: Configure AWS credentials
         id: creds
@@ -103,7 +103,9 @@ jobs:
 
             if [[ ! "$IMAGE_META" == *"Image not found"* ]]; then
               echo "The image $IMAGE_TAG exists in the repository $ECR_REPOSITORY... retagging."
-              echo "$(aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG)" >> manifest.json
+              echo "$(aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG --output json)" >> manifest.json
+
+              cat manifest.json
 
               aws ecr put-image --repository-name $ECR_REPOSITORY --image-tag $ECR_TAG --image-manifest file://manifest.json
               exit 0
