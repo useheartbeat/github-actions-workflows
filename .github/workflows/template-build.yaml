@@ -100,8 +100,10 @@ jobs:
           echo $ECR_TAG
 
           if [ -z "$ECR_TAG" ]; then
-            echo "Retagging $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG with $ECR_TAG"
-
+            echo "Building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            REPO_TAG=$IMAGE_TAG
+          else
+            echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_TAG"
             IMAGE_META="$(aws ecr describe-images --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG 2> /dev/null || echo 'Image not found')"
 
             echo $IMAGE_META
@@ -111,12 +113,8 @@ jobs:
             else
                 echo "The image $IMAGE_TAG exists in the repository $ECR_REPOSITORY."
             fi
-
-            REPO_TAG=$IMAGE_TAG
-            exit 0
-          else
-            echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_TAG"
             REPO_TAG=$ECR_TAG
+            exit 0
           fi
           
           docker buildx build \
