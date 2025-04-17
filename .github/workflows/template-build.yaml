@@ -103,11 +103,9 @@ jobs:
 
             if [[ ! "$IMAGE_META" == *"Image not found"* ]]; then
               echo "The image $IMAGE_TAG exists in the repository $ECR_REPOSITORY... retagging."
-              MANIFEST="$(aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG)"
+              echo "$(aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG)" >> manifest.json
 
-              echo $MANIFEST
-
-              aws ecr put-image --repository-name $ECR_REPOSITORY --image-tag $ECR_TAG --image-manifest $MANIFEST
+              aws ecr put-image --repository-name $ECR_REPOSITORY --image-tag $ECR_TAG --image-manifest file://manifest.json
               exit 0
             else
               echo "The image $IMAGE_TAG does not exist in the repository $ECR_REPOSITORY."
