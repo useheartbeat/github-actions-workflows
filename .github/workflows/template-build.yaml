@@ -95,11 +95,25 @@ jobs:
           ECR_TAG: ${{ inputs.ecr_tag }}
         run: |
           if [ -z "$ECR_TAG" ]; then
-            echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+            echo "Building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
             REPO_TAG=$IMAGE_TAG
           else
-            echo "building and pushing to: $ECR_REGISTRY/$ECR_REPOSITORY:$ECR_TAG"
-            REPO_TAG=$ECR_TAG
+            echo "Retagging $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG as $ECR_TAG"
+            IMAGE_META="$(aws ecr describe-images --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG 2> /dev/null || echo 'Image not found')"
+
+            if [[ ! "$IMAGE_META" == *"Image not found"* ]]; then
+              echo "The image $IMAGE_TAG exists in the repository $ECR_REPOSITORY... retagging."
+              MANIFEST=$(aws ecr batch-get-image --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG --query 'images[].imageManifest' --output text | jq -c .)
+
+              echo $MANIFEST
+
+              aws ecr put-image --repository-name $ECR_REPOSITORY --image-tag $ECR_TAG --image-manifest "$MANIFEST"
+              exit 0
+            else
+              echo "The image $IMAGE_TAG does not exist in the repository $ECR_REPOSITORY."
+              echo "Building fresh image with release tag."
+              REPO_TAG=$ECR_REPO
+            fi
           fi
           
           docker buildx build \
