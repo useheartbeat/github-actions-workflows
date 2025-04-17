@@ -100,6 +100,8 @@ jobs:
 
             IMAGE_META="$(aws ecr describe-images --repository-name $ECR_REPOSITORY --image-ids imageTag=$IMAGE_TAG 2> /dev/null || echo 'Image not found')"
 
+            echo $IMAGE_META
+
             if [[ "$IMAGE_META" == *"Image not found"* ]]; then
                 echo "The image $IMAGE_TAG does not exist in the repository $REPOSITORY."
             else
