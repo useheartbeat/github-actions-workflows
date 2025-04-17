@@ -55,10 +55,10 @@ jobs:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
 
-      # - name: Run GitHub Action for ORT
-      #   uses: oss-review-toolkit/ort-ci-github-action@v1
-      #   with:
-      #     allow-dynamic-versions: 'true'
+      - name: Run GitHub Action for ORT
+        uses: oss-review-toolkit/ort-ci-github-action@v1
+        with:
+          allow-dynamic-versions: 'true'
 
       - name: Configure AWS credentials
         id: creds
