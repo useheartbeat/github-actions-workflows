@@ -68,6 +68,7 @@ jobs:
           aws-region: us-east-1
           role-session-name: actions-build
           output-credentials: true
+          use-existing-credentials: true
 
       - name: Login to Amazon ECR
         id: login-ecr
