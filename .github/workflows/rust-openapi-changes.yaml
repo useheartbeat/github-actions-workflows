@@ -45,11 +45,11 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Copy openapi.yaml
-        run: cp ${{ inputs.env }}.yaml ${{ inputs.env }}.yaml_bak
+        run: cp ${{ inputs.openapi_file_name }}.yaml ${{ inputs.openapi_file_name }}.yaml_bak
         shell: bash
 
       - name: Generate OpenAPI specification
         run: cargo run --bin gen-openapi --verbose
 
       - name: Compare files
-        run: diff --side-by-side ${{ inputs.env }}.yaml ${{ inputs.env }}.yaml_bak
+        run: diff --side-by-side ${{ inputs.openapi_file_name }}.yaml ${{ inputs.openapi_file_name }}.yaml_bak
