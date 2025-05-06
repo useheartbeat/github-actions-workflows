@@ -26,6 +26,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install OCR Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libleptonica-dev \
+            libtesseract-dev \
+            tesseract-ocr \
+            poppler-utils \
+            pkg-config
+
       - uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
