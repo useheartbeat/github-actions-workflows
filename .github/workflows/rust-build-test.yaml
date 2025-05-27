@@ -16,7 +16,7 @@ env:
   SCCACHE_S3_KEY_PREFIX: ${{ github.event.repository.name }}
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-m
     permissions:
       id-token: write
       contents: read
