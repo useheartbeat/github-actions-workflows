@@ -48,13 +48,8 @@ jobs:
         run: cp ${{ inputs.openapi_file_name }} ${{ inputs.openapi_file_name }}_bak
         shell: bash
 
-      - name: Cache Cargo registry
-        uses: actions/cache@v3
-        with:
-          path: ~/.cargo/registry
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-cargo-
+      - name: Rust cache
+        uses: Swatinem/rust-cache@v2
 
       - name: Generate OpenAPI specification
         run: cargo run --bin gen-openapi --verbose
