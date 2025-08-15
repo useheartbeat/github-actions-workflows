@@ -35,7 +35,7 @@ jobs:
   
         - name: Check out repo
           id: checkout
-          uses: actions/checkout@v4
+          uses: actions/checkout@v5
 
         - name: Setup Terraform v1.6.5
           id: setup-tf
